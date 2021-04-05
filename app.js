@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const path = require('path');
+const compression = require('compression');
 const globalErrorHandler = require('./controllers/errorController');
 const app = express();
 // const fileupload = require('express-fileupload');
@@ -12,6 +13,7 @@ const rateLimit = require('express-rate-limit');
 const hpp = require('hpp');
 const cors = require('cors');
 
+app.use(compression());
 app.use(express.json({ limit: '10kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
