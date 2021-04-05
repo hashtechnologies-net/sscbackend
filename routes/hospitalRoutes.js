@@ -5,17 +5,13 @@ const authController = require('./../controllers/authController');
 
 const router = express.Router();
 
-router.use(
-  hospitalController.uploadHospitalPhoto,
-  hospitalController.resizeHospitalPhoto
-);
-
-// router.use(authController.protect);
 router
   .route('/')
   .get(hospitalController.getAllHospitals)
   .post(
     authController.protect,
+    hospitalController.uploadHospitalPhoto,
+    hospitalController.resizeHospitalPhoto,
     authController.restrictTo('admin'),
     hospitalController.createHospital
   );
@@ -23,7 +19,12 @@ router
 router
   .route('/:id')
   .get(hospitalController.getHospital)
-  .patch(authController.restrictTo('admin'), hospitalController.updateHospital)
+  .patch(
+    authController.restrictTo('admin'),
+    hospitalController.uploadHospitalPhoto,
+    hospitalController.resizeHospitalPhoto,
+    hospitalController.updateHospital
+  )
   .delete(
     authController.protect,
     authController.restrictTo('admin'),

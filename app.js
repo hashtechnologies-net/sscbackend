@@ -48,6 +48,7 @@ const homeRouter = require('./routes/homeRoutes');
 const AppError = require('./utils/appError');
 
 app.use('/', homeRouter);
+
 app.use('/api/v1/appointment', appointmentRouter);
 app.use('/api/v1/clinics', clinicRouter);
 app.use('/api/v1/doctors', doctorRouter);
