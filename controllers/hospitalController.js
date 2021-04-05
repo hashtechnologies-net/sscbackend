@@ -67,7 +67,7 @@ exports.getAllHospitals = catchAsync(async (req, res, next) => {
   //   .sort()
   //   .limitFields()
   //   .paginate();
-  const hospitals = await Hospitals.find();
+  const hospitals = await Hospital.find();
 
   return res.status(200).json({
     status: 'success',
