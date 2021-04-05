@@ -59,15 +59,15 @@ exports.getAllHospitals = catchAsync(async (req, res, next) => {
   // const regex = new RegExp(name, i);
   // const hospitals = await Hospital.find({ name: regex });
 
-  const { name } = req.query;
-  const regex = new RegExp(name, 'i');
-  // const hospitals = await Hospital.find({ name: regex });
-  const features = new APIFeatures(Hospital.find(), req.query)
-    .filter({ name: regex })
-    .sort()
-    .limitFields()
-    .paginate();
-  const hospitals = await features.query;
+  // const { name } = req.query;
+  // const regex = new RegExp(name, 'i');
+  // // const hospitals = await Hospital.find({ name: regex });
+  // const features = new APIFeatures(Hospital.find(), req.query)
+  //   .filter({ name: regex })
+  //   .sort()
+  //   .limitFields()
+  //   .paginate();
+  const hospitals = await Hospitals.find();
 
   return res.status(200).json({
     status: 'success',
