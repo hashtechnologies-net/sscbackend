@@ -30,7 +30,7 @@
     "xss-clean": "^0.1.1"
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=15.0.0"
   },
   "devDependencies": {
     "morgan": "^1.10.0"
