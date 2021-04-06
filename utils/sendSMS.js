@@ -1,5 +1,6 @@
-const accountSid = 'AC0b9204896a3f134a628c50ba8f05094b';
-const authToken = 'd805a6b820f487d6bf1813a11dd9a7e6';
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+
 const client = require('twilio')(accountSid, authToken);
 
 const sendSMS = (body, to) => {
@@ -9,9 +10,7 @@ const sendSMS = (body, to) => {
       from: '+16507537470',
       to,
     })
-    .then((message) =>
-      console.log(`Message Sent ${parseInt(Math.random() * 1000000)}`)
-    )
+    .then((message) => console.log(`Message Sent `))
     .catch((err) => console.log(err.message));
 };
 

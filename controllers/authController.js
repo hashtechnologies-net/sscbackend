@@ -2,10 +2,12 @@ const crypto = require('crypto');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const User = require('./../models/userModel');
+const Token = require('./../models/tokenModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const sendEmail = require('./../utils/email');
 const Joi = require('joi');
+const sendSMS = require('../utils/sendSms');
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -34,33 +36,61 @@ const createSendToken = (user, statusCode, req, res) => {
   });
 };
 
-exports.signup = catchAsync(async (req, res, next) => {
-  if (req.body.role) {
-    return next(new AppError(`Bad request`, 400));
-  } else {
-    let otp = Math.random();
-    otp = otp * 1000000;
-    otp = parseInt(otp);
-    console.log(otp);
-    req.body.otp = otp;
-
-    const newUser = await User.create(req.body);
-
-    try {
-      const subject = `Welcome to Health Wealth Card , ${req.body.name}.`;
-      const message = `Thank you for applying to us. Now , you can start getting Discounts on all healthcare services that we provide.Your otp code is ${otp}`;
-      await sendEmail({
+exports.signup = (req, res, next) => {
+  User.findOne({ phone: req.body.phone }, function (err, user) {
+    // error occur
+    if (err) {
+      return res.status(500).send({ msg: err.message });
+    }
+    // if phone is exist into database i.e. phone is associated with another user.
+    else if (user) {
+      return res.status(400).send({
+        msg: 'This phone number is already associated with another account.',
+      });
+    }
+    // if user is not exist into database then save the user into database for register account
+    else {
+      // create and save user
+      user = new User({
+        name: req.body.name,
         email: req.body.email,
-        subject,
-        message,
+        password: req.body.password,
+        phone: req.body.phone,
       });
 
-      createSendToken(newUser, 201, req, res);
-    } catch (err) {
-      return new AppError(`There was an error sending the email `, 500);
+      user.save(function (err) {
+        if (err) {
+          return res.status(500).send({ msg: err.message });
+        }
+        const otpCode = parseInt(Math.random() * 1000000);
+        // generate token and save
+        let token = new Token({
+          _userId: user._id,
+          token: otpCode,
+        });
+
+        token.save(function (err) {
+          if (err) {
+            return res.status(500).send({ msg: err.message });
+          }
+          sendSMS(`Your verification code :${token.token}`, req.body.phone)
+            .then(() => {
+              return res
+                .status(200)
+                .send(
+                  'A verification code has been sent to ' +
+                    user.phone +
+                    '. It will be expire after one day. If you did not get verification code click on resend token.'
+                );
+            })
+            .catch((err) => {
+              return res.status(500).send(err.message);
+            });
+        });
+      });
     }
-  }
-});
+  });
+};
 
 exports.login = catchAsync(async (req, res, next) => {
   const schema = Joi.object({
@@ -97,11 +127,9 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError('Not for admin login', 401));
   }
   if (!user.isVerified) {
-    return res
-      .status(401)
-      .send({
-        msg: 'Your Email has not been verified. Please click on resend',
-      });
+    return res.status(401).send({
+      msg: 'Your Email has not been verified. Please click on resend',
+    });
   }
 
   // 3) If everything ok, send token to client
@@ -312,3 +340,98 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // 4) Log user in, send JWT
   createSendToken(user, 200, req, res);
 });
+
+// It is GET method, you have to write like that
+//    app.get('/confirmation/:email/:token',confirmEmail)
+
+exports.confirmNumber = function (req, res, next) {
+  Token.findOne({ token: req.params.token }, function (err, token) {
+    // token is not found into database i.e. token may have expired
+    if (!token) {
+      return res.status(400).send({
+        msg:
+          'Your verification code may have expired. Please click on resend for verify your number.',
+      });
+    }
+    // if token is found then check valid user
+    else {
+      User.findOne(
+        { _id: token._userId, phone: req.params.phone },
+        function (err, user) {
+          // not valid user
+          if (!user) {
+            return res.status(401).send({
+              msg:
+                'We were unable to find a user for this verification. Please SignUp!',
+            });
+          }
+          // user is already verified
+          else if (user.isVerified) {
+            return res
+              .status(200)
+              .send('User has been already verified. Please Login');
+          }
+          // verify user
+          else {
+            // change isVerified to true
+            user.isVerified = true;
+            user.save(function (err) {
+              // error occur
+              if (err) {
+                return res.status(500).send({ msg: err.message });
+              }
+              // account successfully verified
+              else {
+                return res
+                  .status(200)
+                  .send('Your account has been successfully verified');
+              }
+            });
+          }
+        }
+      );
+    }
+  });
+};
+
+exports.resendCode = function (req, res, next) {
+  User.findOne({ phone: req.body.phone }, function (err, user) {
+    // user is not found into database
+    if (!user) {
+      return res.status(400).send({
+        msg:
+          'We were unable to find a user with that phone. Make sure your Phone number is correct!',
+      });
+    }
+    // user has been already verified
+    else if (user.isVerified) {
+      return res
+        .status(200)
+        .send('This number has been already verified. Please log in.');
+    }
+    // send verification link
+    else {
+      const otpCode = parseInt(Math.random() * 1000000);
+      // generate token and save
+      let token = new Token({ _userId: user._id, token: otpCode });
+      token.save(function (err) {
+        if (err) {
+          return res.status(500).send({ msg: err.message });
+        }
+        sendSMS(`Your verification code :${token.token}`, req.body.phone)
+          .then(() => {
+            return res
+              .status(200)
+              .send(
+                'A verification code has been sent to ' +
+                  user.phone +
+                  '. It will be expire after one day. If you did not get verification code click on resend token.'
+              );
+          })
+          .catch((err) => {
+            return res.status(500).send(err.message);
+          });
+      });
+    }
+  });
+};
