@@ -73,7 +73,10 @@ exports.signup = (req, res, next) => {
           if (err) {
             return res.status(500).send({ msg: err.message });
           }
-          sendSMS(`Your verification code :${token.token}`, req.body.phone)
+          sendSMS(
+            `Your verification code :${token.token}`,
+            `+977${req.body.phone}`
+          )
             .then(() => {
               return res
                 .status(200)
@@ -128,7 +131,7 @@ exports.login = catchAsync(async (req, res, next) => {
   }
   if (!user.isVerified) {
     return res.status(401).send({
-      msg: 'Your Email has not been verified. Please click on resend',
+      msg: 'Your Phone Number has not been verified. Please click on resend',
     });
   }
 
@@ -418,7 +421,10 @@ exports.resendCode = function (req, res, next) {
         if (err) {
           return res.status(500).send({ msg: err.message });
         }
-        sendSMS(`Your verification code :${token.token}`, req.body.phone)
+        sendSMS(
+          `Your verification code :${token.token}`,
+          `+977${req.body.phone}`
+        )
           .then(() => {
             return res
               .status(200)
