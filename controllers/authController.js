@@ -351,7 +351,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 // It is GET method, you have to write like that
 //    app.get('/confirmation/:email/:token',confirmEmail)
 
-exports.confirmNumber = function (req, res, next) {
+exports.verifyNumber = function (req, res, next) {
   Token.findOne({ token: req.params.token }, function (err, token) {
     // token is not found into database i.e. token may have expired
     if (!token) {
