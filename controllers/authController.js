@@ -76,19 +76,26 @@ exports.signup = (req, res, next) => {
           sendSMS(
             `Your verification code :${token.token}`,
             `+977${req.body.phone}`
-          )
-            .then(() => {
-              return res
-                .status(200)
-                .send(
-                  'A verification code has been sent to ' +
-                    user.phone +
-                    '. It will be expire after one day. If you did not get verification code click on resend token.'
-                );
-            })
-            .catch((err) => {
-              return res.status(500).send(err.message);
-            });
+          );
+          return res
+            .status(200)
+            .send(
+              'A verification code has been sent to ' +
+                user.phone +
+                '. It will be expire after one day. If you did not get verification code click on resend token.'
+            );
+          // .then(() => {
+          //   return res
+          //     .status(200)
+          //     .send(
+          //       'A verification code has been sent to ' +
+          //         user.phone +
+          //         '. It will be expire after one day. If you did not get verification code click on resend token.'
+          //     );
+          // })
+          // .catch((err) => {
+          //   return res.status(500).send(err.message);
+          // });
         });
       });
     }
