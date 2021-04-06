@@ -77,13 +77,11 @@ exports.signup = (req, res, next) => {
             `Your verification code :${token.token}`,
             `+977${req.body.phone}`
           );
-          return res
-            .status(200)
-            .send(
-              'A verification code has been sent to ' +
-                user.phone +
-                '. It will be expire after one day. If you did not get verification code click on resend token.'
-            );
+          return res.status(200).json({
+            status: 'success',
+            message: `A verification code has been sent to 
+              ${user.phone} . It will be expire after one day. If you did not get verification code click on resend token.`,
+          });
           // .then(() => {
           //   return res
           //     .status(200)
