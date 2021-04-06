@@ -49,33 +49,23 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
-  active: {
-    type: Boolean,
-    default: true,
-    select: false,
-  },
+
   isVerified: {
     type: Boolean,
     default: false,
   },
   phone: {
     type: Number,
-  },
-  gender: {
-    type: String,
-    required: [true, , 'Please specify a gender'],
+    required: [true, 'Please enter your number'],
   },
   province: {
     type: String,
-    required: [true, 'Please specify your province'],
   },
   district: {
     type: String,
-    required: [true, 'Please specify your district'],
   },
   city: {
     type: String,
-    required: [true, 'Please specify your city'],
   },
 });
 

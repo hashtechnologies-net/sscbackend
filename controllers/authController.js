@@ -44,6 +44,16 @@ exports.signup = catchAsync(async (req, res, next) => {
     console.log(otp);
     req.body.otp = otp;
 
+    User.findOne({ email: req.body.email }, function (err, user) {
+    // error occur
+    if(err){
+        return res.status(500).send({msg: err.message});
+    }
+    // if email is exist into database i.e. email is associated with another user.
+    else if (user) {
+        return res.status(400).send({msg:'This email address is already associated with another account.'});
+    }
+
     const newUser = await User.create(req.body);
 
     try {
@@ -90,12 +100,19 @@ exports.login = catchAsync(async (req, res, next) => {
   const user = await User.findOne({ email }).select('+password');
 
   if (!user || !(await user.correctPassword(password, user.password))) {
-    return next(new AppError('Incorrect email or password', 401));
+    return next(new AppError('Invalid email or password', 401));
   }
 
   if (user.role === 'admin') {
     return next(new AppError('Not for admin login', 401));
   }
+  if (!user.isVerified) {
+    return res
+      .status(401)
+      .send({
+        msg: 'Your Email has not been verified. Please click on resend',
+      });
+  } 
 
   // 3) If everything ok, send token to client
   createSendToken(user, 200, req, res);
