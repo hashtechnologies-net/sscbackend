@@ -7,7 +7,7 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const sendEmail = require('./../utils/email');
 const Joi = require('joi');
-const sendSMS = require('../utils/sendSms');
+const sendSMS = require('../utils/sendSMS');
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {

@@ -27,9 +27,9 @@ exports.getAllAppointments = catchAsync(async (req, res, next) => {
 });
 
 exports.getAppointment = catchAsync(async (req, res, next) => {
-  const appointmnet = await Appointment.findById(req.params.id);
+  const appointment = await Appointment.findById(req.params.id);
 
-  if (!appointmnet) {
+  if (!appointment) {
     return next(new AppError('No appointment found with that id', 404));
   }
   res.status(200).json({ status: 'success', data: appointment });
