@@ -74,7 +74,7 @@ exports.signup = (req, res, next) => {
             return res.status(500).send({ msg: err.message });
           }
           sendSMS(
-            `Your verification code :${token.token}`,
+            `Welcome to SSC .Your verification code :${token.token}`,
             `+977${req.body.phone}`
           );
           return res.status(200).json({
@@ -435,7 +435,7 @@ exports.resendCode = function (req, res, next) {
               .send(
                 'A verification code has been sent to ' +
                   user.phone +
-                  '. It will be expire after one day. If you did not get verification code click on resend token.'
+                  '. It will be expire after 10 mins. If you did not get verification code click on resend token.'
               );
           })
           .catch((err) => {
