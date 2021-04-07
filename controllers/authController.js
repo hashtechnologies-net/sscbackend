@@ -79,7 +79,7 @@ exports.signup = (req, res, next) => {
           );
           return res.status(200).json({
             status: 'success',
-            message: `A verification code has been sent to ${user.phone} . It will be expire after one day. If you did not get verification code click on resend token.`,
+            message: `A verification code has been sent to ${user.phone} . It will be expire after 10 minutes. If you did not get verification code click on resend token.`,
           });
           // .then(() => {
           //   return res
