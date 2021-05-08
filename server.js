@@ -11,7 +11,7 @@ process.on('uncaughtException', (err) => {
 
 const DB =
   // process.env.DATABASE_LOCAL;
-  process.env.DATABASE
+  process.env.DATABASE;
 
 mongoose
   .connect(DB, {
@@ -32,6 +32,7 @@ const port = process.env.PORT || 5000;
 const server = app.listen(port, () => {
   console.log(`Server running at PORT : ${port}/`);
 });
+
 
 process.on('unhandledRejection', (err) => {
   console.log(err.name, err.message);

@@ -132,4 +132,8 @@ userSchema.methods.createPasswordResetToken = function () {
 
 const User = mongoose.model('User', userSchema);
 
+userSchema.methods.setUserVerified = function () {
+  this.isVerified = true;
+};
+
 module.exports = User;

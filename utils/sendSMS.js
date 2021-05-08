@@ -10,7 +10,7 @@ const sendSMS = (body, to) => {
       from: '+16507537470',
       to,
     })
-    .then((message) => console.log(`Message Sent `))
+    .then((message) => console.log(`Message Sent: ${message}`))
     .catch((err) => console.log(err.message));
 };
 

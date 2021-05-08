@@ -4,8 +4,9 @@ const catchAsync = require('../utils/catchAsync');
 const APIFeatures = require('./../utils/apiFeatures');
 
 exports.createAppointment = catchAsync(async (req, res, next) => {
-  newAppointment = await Appointment.create(req.body);
-  res.status(201).json({ status: 'success', data: newAppointment });
+    newAppointment = await Appointment.create(req.body);
+    res.status(201).json({ status: 'success', data: newAppointment });
+  
 });
 
 exports.getAllAppointments = catchAsync(async (req, res, next) => {

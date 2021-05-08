@@ -40,7 +40,7 @@ exports.signup = (req, res, next) => {
   User.findOne({ phone: req.body.phone }, function (err, user) {
     // error occur
     if (err) {
-      return res.status(500).send({ msg: err.message });
+      return res.status(500).send({ message: err.message });
     }
     // if phone is exist into database i.e. phone is associated with another user.
     else if (user) {
@@ -50,51 +50,58 @@ exports.signup = (req, res, next) => {
     }
     // if user is not exist into database then save the user into database for register account
     else {
-      // create and save user
-      user = new User({
-        name: req.body.name,
-        email: req.body.email,
-        password: req.body.password,
-        phone: req.body.phone,
-      });
-
-      user.save(function (err) {
+      User.findOne({ email: req.body.email }, function (err, user) {
         if (err) {
-          return res.status(500).send({ msg: err.message });
-        }
-        const otpCode = parseInt(Math.random() * 1000000);
-        // generate token and save
-        let token = new Token({
-          _userId: user._id,
-          token: otpCode,
-        });
-
-        token.save(function (err) {
-          if (err) {
-            return res.status(500).send({ msg: err.message });
-          }
-          sendSMS(
-            `Welcome to SSC .Your verification code :${token.token}`,
-            `+977${req.body.phone}`
-          );
-          return res.status(200).json({
-            status: 'success',
-            message: `A verification code has been sent to ${user.phone} . It will be expire after 10 minutes. If you did not get verification code click on resend token.`,
+          return res.status(500).send({ message: err.message });
+        } else if (user) {
+          return next(new AppError(`Email Already Exists.`, 500));
+        } else {
+          user = new User({
+            name: req.body.name,
+            email: req.body.email,
+            password: req.body.password,
+            phone: req.body.phone,
           });
-          // .then(() => {
-          //   return res
-          //     .status(200)
-          //     .send(
-          //       'A verification code has been sent to ' +
-          //         user.phone +
-          //         '. It will be expire after one day. If you did not get verification code click on resend token.'
-          //     );
-          // })
-          // .catch((err) => {
-          //   return res.status(500).send(err.message);
-          // });
-        });
+          user.save(function (err) {
+            if (err) {
+              return res.status(500).send({ msg: err.message });
+            }
+            const otpCode = parseInt(Math.random() * 1000000);
+            // generate token and save
+            let token = new Token({
+              _userId: user._id,
+              token: otpCode,
+            });
+
+            token.save(function (err) {
+              if (err) {
+                return res.status(500).send({ msg: err.message });
+              }
+              sendSMS(
+                `Welcome to SSC .Your verification code :${token.token}`,
+                `+977${req.body.phone}`
+              );
+              return res.status(200).json({
+                status: 'success',
+                message: `A verification code has been sent to ${user.phone} . It will be expire after 10 minutes. If you did not get verification code click on resend token.`,
+              });
+              // .then(() => {
+              //   return res
+              //     .status(200)
+              //     .send(
+              //       'A verification code has been sent to ' +
+              //         user.phone +
+              //         '. It will be expire after one day. If you did not get verification code click on resend token.'
+              //     );
+              // })
+              // .catch((err) => {
+              //   return res.status(500).send(err.message);
+              // });
+            });
+          });
+        }
       });
+      // create and save user
     }
   });
 };
@@ -255,7 +262,7 @@ exports.restrictTo = (...roles) => {
     // roles ['admin', 'lead-guide']. role='user'
     if (!roles.includes(req.user.role)) {
       return next(
-        new AppError('You do not have permission to perform this action.', 403)
+        new AppError(`You do not have permission to perform this action.`, 403)
       );
     }
     next();

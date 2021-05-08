@@ -36,6 +36,7 @@ app.use('/api', limiter);
 app.use(cors());
 // app.use(fileupload());
 const appointmentRouter = require('./routes/appointmentRoutes');
+
 const clinicRouter = require('./routes/clinicRoutes');
 const doctorRouter = require('./routes/doctorRoutes');
 const hospitalRouter = require('./routes/hospitalRoutes');
