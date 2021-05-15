@@ -30,6 +30,7 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'merchant'],
     default: 'user',
   },
+
   password: {
     type: String,
     required: [true, 'Please provide a password'],
@@ -66,6 +67,11 @@ const userSchema = new mongoose.Schema({
   },
   city: {
     type: String,
+  },
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
   },
 });
 
