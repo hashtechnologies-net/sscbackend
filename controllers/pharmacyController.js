@@ -49,18 +49,42 @@ exports.createPharmacy = catchAsync(async (req, res, next) => {
 
 exports.getAllPharmacy = catchAsync(async (req, res, next) => {
   const { name } = req.query;
-  const regex = new RegExp(name, 'i');
-  const features = new APIFeatures(Pharmacy.find(), req.query)
-    .filter({ name: regex })
-    .sort()
-    .limitFields()
-    .paginate();
-  const pharmacy = await features.query;
-  return res.status(200).json({
-    status: 'success',
-    results: pharmacy.length,
-    data: pharmacy,
-  });
+  if (name) {
+    const regex = new RegExp(name, 'i');
+    const features = new APIFeatures(Pathlab.find(), req.query)
+      .filter({ name: regex })
+      .sort()
+      .limitFields()
+      .paginate();
+    const pathlabs = await features.query;
+    const pathlabsCount = await Pathlab.countDocuments();
+
+    return res.status(200).json({
+      status: 'success',
+      data: pathlabs,
+      pathlabsCount,
+    });
+  } else {
+    const { page, limit } = req.query;
+
+    const options = {
+      page: parseInt(page, 10) || 1,
+      limit: parseInt(limit, 10) || 100,
+    };
+
+    const paginate = await Pathlab.paginate({}, options);
+
+    return res.status(200).json({
+      status: 'success',
+      data: paginate.docs,
+      paginate: {
+        total: paginate.total,
+        limit: paginate.limit,
+        page: paginate.page,
+        pages: paginate.pages,
+      },
+    });
+  }
 });
 
 exports.getPharmacy = catchAsync(async (req, res, next) => {

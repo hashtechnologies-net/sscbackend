@@ -2,6 +2,7 @@ const AppError = require('./../utils/appError');
 
 const handleCastErrorDB = (err) => {
   const message = `Invalid ${err.path}: ${err.value}.`;
+
   return new AppError(message, 400);
 };
 
@@ -15,6 +16,7 @@ const handleDuplicateFieldsDB = (err) => {
 
 const handleValidationErrorDB = (err) => {
   // const errors = Object.values(err.errors).map((el) => el.message);
+
   // const message = `Invalid data inserted. ${errors.join('. --')}`;
 
   const message = Object.values(err.errors).map((el) => el.message);

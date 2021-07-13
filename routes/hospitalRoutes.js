@@ -20,6 +20,7 @@ router
   .route('/:id')
   .get(hospitalController.getHospital)
   .patch(
+    authController.protect,
     authController.restrictTo('admin'),
     hospitalController.uploadHospitalPhoto,
     hospitalController.resizeHospitalPhoto,

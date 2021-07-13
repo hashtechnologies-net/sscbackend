@@ -52,19 +52,45 @@ exports.getAllPathlabs = catchAsync(async (req, res, next) => {
   //   return res.status(200).json({ results: hospitals.length, data: hospitals });
   // });
   // // find({ EmployeeName: { $regex: 'Gu', $options: 'i' } });
+
   const { name } = req.query;
-  const regex = new RegExp(name, 'i');
-  const features = new APIFeatures(Pathlab.find(), req.query)
-    .filter({ name: regex })
-    .sort()
-    .limitFields()
-    .paginate();
-  const pathlabs = await features.query;
-  return res.status(200).json({
-    status: 'success',
-    results: pathlabs.length,
-    data: pathlabs,
-  });
+  if (name) {
+    const regex = new RegExp(name, 'i');
+    // const pathlabs = await Pathlab.find({ name: regex });
+    const features = new APIFeatures(Pathlab.find(), req.query)
+      .filter({ name: regex })
+      .sort()
+      .limitFields()
+      .paginate();
+    const pathlabs = await features.query;
+    const pathlabsCount = await Pathlab.countDocuments();
+
+    return res.status(200).json({
+      status: 'success',
+      data: pathlabs,
+      pathlabsCount,
+    });
+  } else {
+    const { page, limit } = req.query;
+
+    const options = {
+      page: parseInt(page, 10) || 1,
+      limit: parseInt(limit, 10) || 100,
+    };
+
+    const paginate = await Pathlab.paginate({}, options);
+
+    return res.status(200).json({
+      status: 'success',
+      data: paginate.docs,
+      paginate: {
+        total: paginate.total,
+        limit: paginate.limit,
+        page: paginate.page,
+        pages: paginate.pages,
+      },
+    });
+  }
 });
 
 exports.getPathlab = catchAsync(async (req, res, next) => {

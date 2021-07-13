@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 
+const mongoosePaginate = require('mongoose-paginate');
+
 const hospitalSchema = new mongoose.Schema(
   {
     name: {
@@ -32,7 +34,6 @@ const hospitalSchema = new mongoose.Schema(
     },
     phone: {
       type: Number,
-      required: [true, 'A hospital must have a phone number'],
     },
     openTime: {
       type: String,
@@ -53,6 +54,8 @@ hospitalSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
+
+hospitalSchema.plugin(mongoosePaginate);
 const Hospital = mongoose.model('Hospital', hospitalSchema);
 
 module.exports = Hospital;

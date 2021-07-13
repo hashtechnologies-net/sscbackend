@@ -4,6 +4,10 @@ const rentalController = require('./../controllers/rentalController');
 const authController = require('./../controllers/authController');
 const router = express.Router();
 
+
+
+
+
 router
   .route('/')
   .get(rentalController.getAllRentals)

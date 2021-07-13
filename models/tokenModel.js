@@ -7,13 +7,15 @@ const tokenSchema = new mongoose.Schema({
     ref: 'User',
   },
   token: { type: String, required: true },
+
   expireAt: {
     type: Date,
     default: Date.now,
-    index: { expireAfterSeconds: 600 },
+    index: { expireAfterSeconds: 86400000 },
   },
 });
 
 const token = mongoose.model('token', tokenSchema);
 
 module.exports = token;
+

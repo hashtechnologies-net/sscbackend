@@ -8,6 +8,7 @@ const AppError = require('./../utils/appError');
 const sendEmail = require('./../utils/email');
 const Joi = require('joi');
 const sendSMS = require('../utils/sendSMS');
+const bcrypt = require('bcrypt');
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -36,75 +37,119 @@ const createSendToken = (user, statusCode, req, res) => {
   });
 };
 
-exports.signup = (req, res, next) => {
-  User.findOne({ phone: req.body.phone }, function (err, user) {
-    // error occur
-    if (err) {
-      return res.status(500).send({ message: err.message });
-    }
-    // if phone is exist into database i.e. phone is associated with another user.
-    else if (user) {
-      return res.status(400).send({
-        msg: 'This phone number is already associated with another account.',
-      });
-    }
-    // if user is not exist into database then save the user into database for register account
-    else {
-      User.findOne({ email: req.body.email }, function (err, user) {
-        if (err) {
-          return res.status(500).send({ message: err.message });
-        } else if (user) {
-          return next(new AppError(`Email Already Exists.`, 500));
-        } else {
-          user = new User({
-            name: req.body.name,
-            email: req.body.email,
-            password: req.body.password,
-            phone: req.body.phone,
-          });
-          user.save(function (err) {
-            if (err) {
-              return res.status(500).send({ msg: err.message });
-            }
-            const otpCode = parseInt(Math.random() * 1000000);
-            // generate token and save
-            let token = new Token({
-              _userId: user._id,
-              token: otpCode,
-            });
+// exports.signup = (req, res, next) => {
+//   User.findOne({ email: req.body.email }, function (err, user) {
+//     // error occur
+//     if (err) {
+//       return res.status(500).send({ status: 'fail', message: err.message });
+//     }
+//     // if phone is exist into database i.e. phone is associated with another user.
+//     else if (user) {
+//       return res.status(400).send({
+//         status: 'fail',
+//         message:
+//           'This phone number is already associated with another account.',
+//       });
+//     }
+//     // if user is not exist into database then save the user into database for register account
+//     else {
+//       User.findOne({ email: req.body.email }, function (err, user) {
+//         if (err) {
+//           return res.status(500).send({ status: 'fail', message: err.message });
+//         } else if (user) {
+//           return next(new AppError(`Email Already Exists.`, 500));
+//         } else {
+//           user = new User(req.body);
+//           user.save(function (err) {
+//             if (err) {
+//               return next(new AppError(`${err.message}`, 500));
+//             }
+//             var token = new Token({
+//               _userId: user._id,
+//               token: crypto.randomBytes(16).toString('hex'),
+//             });
+//             // generate token and save
+//             token.save(function (err) {
+//               if(err){
+//                 return res.status(500).send({msg:err.message});
+//               }
 
-            token.save(function (err) {
-              if (err) {
-                return res.status(500).send({ msg: err.message });
-              }
-              sendSMS(
-                `Welcome to SSC .Your verification code :${token.token}`,
-                `+977${req.body.phone}`
-              );
-              return res.status(200).json({
-                status: 'success',
-                message: `A verification code has been sent to ${user.phone} . It will be expire after 10 minutes. If you did not get verification code click on resend token.`,
-              });
-              // .then(() => {
-              //   return res
-              //     .status(200)
-              //     .send(
-              //       'A verification code has been sent to ' +
-              //         user.phone +
-              //         '. It will be expire after one day. If you did not get verification code click on resend token.'
-              //     );
-              // })
-              // .catch((err) => {
-              //   return res.status(500).send(err.message);
-              // });
-            });
-          });
-        }
-      });
-      // create and save user
-    }
+//             token.save(function (err) {
+//               if (err) {
+//                 return res.status(500).send({ msg: err.message });
+//               }
+//               await sendEmail(
+//                 `Welcome to SSC .Your verification code :${token.token}`,
+//                 `${req.body.email}`
+//               );
+//               return res.status(200).json({
+//                 status: 'success',
+//                 message: `A verification code has been sent to ${user.email} . It will be expire after 10 minutes. If you did not get verification code click on resend token.`,
+//               });
+//               // .then(() => {
+//               //   return res
+//               //     .status(200)
+//               //     .send(
+//               //       'A verification code has been sent to ' +
+//               //         user.phone +
+//               //         '. It will be expire after one day. If you did not get verification code click on resend token.'
+//               //     );
+//               // })
+//               // .catch((err) => {
+//               //   return res.status(500).send(err.message);
+//               // });
+//             });
+//           });
+//         }
+//       );
+//       // create and save user
+//     }
+//   });
+// };
+
+exports.signup = catchAsync(async (req, res, next) => {
+  const schema = Joi.object({
+    password: Joi.string()
+      .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
+      .required(),
+    email: Joi.string()
+      .email({
+        minDomainSegments: 2,
+        tlds: { allow: ['com', 'net'] },
+      })
+      .required(),
+    name: Joi.string().required(),
   });
-};
+
+  const { error } = schema.validate({
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+  });
+
+  if (error) {
+    return next(new AppError(`${error.details[0].message}`, 403));
+  }
+  const { email } = req.body;
+
+  const userExists = await User.findOne({ email });
+
+  if (userExists) {
+    return res.status(409).json({
+      status: 'fail',
+      message: 'This email address is already associated with another account.',
+    });
+  }
+
+  let user = new User({
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+  });
+
+  user = await user.save();
+  createSendToken(user, 200, req, res);
+});
 
 exports.login = catchAsync(async (req, res, next) => {
   const schema = Joi.object({
@@ -140,17 +185,35 @@ exports.login = catchAsync(async (req, res, next) => {
   if (user.role === 'admin') {
     return next(new AppError('Not for admin login', 401));
   }
-  if (!user.isVerified) {
-    return res.status(401).send({
-      msg: 'Your Phone Number has not been verified. Please click on resend',
-    });
-  }
+  // if (!user.isVerified) {
+  //   return res.status(401).send({
+  //     status: 'fail',
+  //     message: 'Your Email has not been verified. Please click on resend',
+  //   });
+  // }
 
   // 3) If everything ok, send token to client
   createSendToken(user, 200, req, res);
 });
 
 exports.loginAdmin = catchAsync(async (req, res, next) => {
+  const schema = Joi.object({
+    password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')),
+    email: Joi.string().email({
+      minDomainSegments: 2,
+      tlds: { allow: ['com', 'net'] },
+    }),
+  });
+
+  const { error } = schema.validate({
+    email: req.body.email,
+    password: req.body.password,
+  });
+
+  if (error) {
+    return next(new AppError(`${error.details[0].message}`, 403));
+  }
+
   const { email, password } = req.body;
 
   // 1) Check if email and password exist
@@ -164,8 +227,13 @@ exports.loginAdmin = catchAsync(async (req, res, next) => {
     return next(new AppError('Incorrect email or password', 401));
   }
 
-  if (user.role === 'user') {
-    return next(new AppError('Not for user login', 401));
+  if (user.role !== 'admin') {
+    return next(
+      new AppError(
+        `Bad request . User with role : ${user.role} is not authorized to access this resource`,
+        401
+      )
+    );
   }
 
   createSendToken(user, 200, req, res);
@@ -200,6 +268,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
 
   // 2) Verification token
+
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
   // 3) Check if user still exists
@@ -221,6 +290,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
 
   // GRANT ACCESS TO PROTECTED ROUTE
+
   req.user = currentUser;
   // res.locals.user = currentUser;
   next();
@@ -268,6 +338,8 @@ exports.restrictTo = (...roles) => {
     next();
   };
 };
+
+// Node js express  authentication and authorization middleware
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on POSTed email

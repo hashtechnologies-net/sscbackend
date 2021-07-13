@@ -27,10 +27,9 @@ const userSchema = new mongoose.Schema({
 
   role: {
     type: String,
-    enum: ['user', 'merchant'],
+    enum: ['user', 'merchant', 'volunteer'],
     default: 'user',
   },
-
   password: {
     type: String,
     required: [true, 'Please provide a password'],
@@ -57,7 +56,6 @@ const userSchema = new mongoose.Schema({
   },
   phone: {
     type: Number,
-    required: [true, 'Please enter your number'],
   },
   province: {
     type: String,
@@ -136,10 +134,10 @@ userSchema.methods.createPasswordResetToken = function () {
   return resetToken;
 };
 
-const User = mongoose.model('User', userSchema);
-
 userSchema.methods.setUserVerified = function () {
   this.isVerified = true;
 };
+
+const User = mongoose.model('User', userSchema);
 
 module.exports = User;
