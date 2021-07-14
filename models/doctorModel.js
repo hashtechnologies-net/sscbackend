@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const mongoosePaginate = require('mongoose-paginate');
 
 const doctorSchema = new mongoose.Schema(
   {
@@ -40,6 +41,7 @@ const doctorSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+doctorSchema.plugin(mongoosePaginate);
 doctorSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();

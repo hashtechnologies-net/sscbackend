@@ -51,18 +51,18 @@ exports.getAllPharmacy = catchAsync(async (req, res, next) => {
   const { name } = req.query;
   if (name) {
     const regex = new RegExp(name, 'i');
-    const features = new APIFeatures(Pathlab.find(), req.query)
+    const features = new APIFeatures(Pharmacy.find(), req.query)
       .filter({ name: regex })
       .sort()
       .limitFields()
       .paginate();
-    const pathlabs = await features.query;
-    const pathlabsCount = await Pathlab.countDocuments();
+    const pharmacy = await features.query;
+    const pharmacyCount = await Pharmacy.countDocuments();
 
     return res.status(200).json({
       status: 'success',
-      data: pathlabs,
-      pathlabsCount,
+      data: pharmacy,
+      pharmacyCount,
     });
   } else {
     const { page, limit } = req.query;
@@ -72,7 +72,7 @@ exports.getAllPharmacy = catchAsync(async (req, res, next) => {
       limit: parseInt(limit, 10) || 100,
     };
 
-    const paginate = await Pathlab.paginate({}, options);
+    const paginate = await Pharmacy.paginate({}, options);
 
     return res.status(200).json({
       status: 'success',
