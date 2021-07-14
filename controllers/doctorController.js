@@ -41,24 +41,59 @@ exports.resizeDoctorPhoto = catchAsync(async (req, res, next) => {
 });
 
 exports.createDoctor = catchAsync(async (req, res, next) => {
+  const { name } = req.body;
+  const doctorExists = await Doctor.findOne({ name });
+
+  if (doctorExists) {
+    return res.status(400).json({
+      status: 'fail',
+      message: `Doctor with that name ${name} already exists.`,
+    });
+  }
+
   newDoctor = await Doctor.create(req.body);
   res.status(201).json({ status: 'success', data: newDoctor });
 });
 
 exports.getAllDoctors = catchAsync(async (req, res, next) => {
   const { name } = req.query;
-  const regex = new RegExp(name, 'i');
-  const features = new APIFeatures(Doctor.find(), req.query)
-    .filter({ name: regex })
-    .sort()
-    .limitFields()
-    .paginate();
-  const doctors = await features.query;
-  return res.status(200).json({
-    status: 'success',
-    results: doctors.length,
-    data: doctors,
-  });
+  if (name) {
+    const regex = new RegExp(name, 'i');
+    // const pathlabs = await Pathlab.find({ name: regex });
+    const features = new APIFeatures(Doctor.find(), req.query)
+      .filter({ name: regex })
+      .sort()
+      .limitFields()
+      .paginate();
+    const doctors = await features.query;
+    const doctorsCount = await Doctor.countDocuments();
+
+    return res.status(200).json({
+      status: 'success',
+      data: doctors,
+      doctorsCount,
+    });
+  } else {
+    const { page, limit } = req.query;
+
+    const options = {
+      page: parseInt(page, 10) || 1,
+      limit: parseInt(limit, 10) || 100,
+    };
+
+    const paginate = await Doctor.paginate({}, options);
+
+    return res.status(200).json({
+      status: 'success',
+      data: paginate.docs,
+      paginate: {
+        total: paginate.total,
+        limit: paginate.limit,
+        page: paginate.page,
+        pages: paginate.pages,
+      },
+    });
+  }
 });
 
 exports.getDoctor = catchAsync(async (req, res, next) => {

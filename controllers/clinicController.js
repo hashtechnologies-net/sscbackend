@@ -41,6 +41,16 @@ exports.resizeClinicPhoto = catchAsync(async (req, res, next) => {
 });
 
 exports.createClinic = catchAsync(async (req, res, next) => {
+  const { name } = req.body;
+  const clinicExists = await Clinic.findOne({ name });
+
+  if (clinicExists) {
+    return res.status(400).json({
+      status: 'fail',
+      message: `Clinic with that name ${name} already exists.`,
+    });
+  }
+
   newClinic = await Clinic.create(req.body);
   res.status(201).json({ status: 'success', data: newClinic });
 });
