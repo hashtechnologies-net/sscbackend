@@ -41,6 +41,15 @@ exports.resizePathlabPhoto = catchAsync(async (req, res, next) => {
 });
 
 exports.createPathlab = catchAsync(async (req, res, next) => {
+  const { name } = req.body;
+  const pathlabExists = await Pathlab.findOne({ name });
+
+  if (pathlabExists) {
+    return res.status(400).json({
+      status: 'fail',
+      message: `Pathlab with that name ${name} already exists.`,
+    });
+  }
   newPathlab = await Pathlab.create(req.body);
   res.status(201).json({ status: 'success', data: newPathlab });
 });

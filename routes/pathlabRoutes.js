@@ -5,17 +5,14 @@ const authController = require('./../controllers/authController');
 
 const router = express.Router();
 
-router.use(
-  pathlabController.uploadPathlabPhoto,
-  pathlabController.resizePathlabPhoto
-);
-
 router
   .route('/')
   .get(pathlabController.getAllPathlabs)
   .post(
     authController.protect,
     authController.restrictTo('admin'),
+    pathlabController.uploadPathlabPhoto,
+    pathlabController.resizePathlabPhoto,
     pathlabController.createPathlab
   );
 
@@ -25,6 +22,8 @@ router
   .patch(
     authController.protect,
     authController.restrictTo('admin'),
+    pathlabController.uploadPathlabPhoto,
+    pathlabController.resizePathlabPhoto,
     pathlabController.updatePathlab
   )
   .delete(
