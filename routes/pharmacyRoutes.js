@@ -5,17 +5,14 @@ const authController = require('./../controllers/authController');
 
 const router = express.Router();
 
-router.use(
-  pharmacyController.uploadPharmacyPhoto,
-  pharmacyController.resizePharmacyPhoto
-);
-
 router
   .route('/')
   .get(pharmacyController.getAllPharmacy)
   .post(
     authController.protect,
     authController.restrictTo('admin'),
+    pharmacyController.uploadPharmacyPhoto,
+    pharmacyController.resizePharmacyPhoto,
     pharmacyController.createPharmacy
   );
 
@@ -25,6 +22,8 @@ router
   .patch(
     authController.protect,
     authController.restrictTo('admin'),
+    pharmacyController.uploadPharmacyPhoto,
+    pharmacyController.resizePharmacyPhoto,
     pharmacyController.updatePharmacy
   )
   .delete(

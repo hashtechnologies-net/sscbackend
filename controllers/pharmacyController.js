@@ -43,6 +43,15 @@ exports.resizePharmacyPhoto = catchAsync(async (req, res, next) => {
 });
 
 exports.createPharmacy = catchAsync(async (req, res, next) => {
+  const { name } = req.body;
+  const pharmacy = await Pharmacy.findOne({ name });
+
+  if (pharmacy) {
+    return res.status(400).json({
+      status: 'fail',
+      message: `Pharmacy with that name ${name} already exists.`,
+    });
+  }
   newPharmacy = await Pharmacy.create(req.body);
   res.status(201).json({ status: 'success', data: newPharmacy });
 });
