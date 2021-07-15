@@ -5,17 +5,14 @@ const authController = require('./../controllers/authController');
 
 const router = express.Router();
 
-router.use(
-  clinicController.uploadClinicPhoto,
-  clinicController.resizeClinicPhoto
-);
-
 router
   .route('/')
   .get(clinicController.getAllClinics)
   .post(
     authController.protect,
     authController.restrictTo('admin'),
+    clinicController.uploadClinicPhoto,
+    clinicController.resizeClinicPhoto,
     clinicController.createClinic
   );
 
@@ -25,6 +22,8 @@ router
   .patch(
     authController.protect,
     authController.restrictTo('admin'),
+    clinicController.uploadClinicPhoto,
+    clinicController.resizeClinicPhoto,
     clinicController.updateClinic
   )
   .delete(
