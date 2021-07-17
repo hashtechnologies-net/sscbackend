@@ -111,11 +111,13 @@ exports.getUser = factory.getOne(User);
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
   const { name } = req.query;
+  const { email } = req.query;
 
   const regex = new RegExp(name, 'i');
+  const emailRegex = new RegExp(email, 'i');
   // const users = await Hospital.find({ name: regex });
   const features = new APIFeatures(User.find(), req.query)
-    .filter({ name: regex })
+    .filter({ name: regex, email: emailRegex })
     .sort()
     .limitFields()
     .paginate();
@@ -124,11 +126,24 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
 
   return res.status(200).json({
     status: 'success',
-    data: users,
     usersCount,
+    data: users,
   });
 });
 
 // Do NOT update passwords with this!
-exports.updateUser = factory.updateOne(User);
+// exports.updateUser = factory.updateOne(User);
+
+exports.updateUser = catchAsync(async (req, res, next) => {
+  const user = await User.findByIdAndUpdate(req.params.id, req.body, {
+    runValidators: true,
+    new: true,
+  });
+
+  if (!user) {
+    return next(new AppError('No user found with that id', 404));
+  }
+  res.status(200).json({ status: 'success', data: user });
+});
+
 exports.deleteUser = factory.deleteOne(User);

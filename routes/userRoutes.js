@@ -56,6 +56,8 @@ router
   .patch(
     authController.protect,
     authController.restrictTo('admin'),
+    userController.uploadUserPhoto,
+    userController.resizeUserPhoto,
     userController.updateUser
   )
   .delete(
