@@ -106,8 +106,16 @@ exports.createUser = (req, res) => {
   });
 };
 
-exports.getUser = factory.getOne(User);
+// exports.getUser = factory.getOne(User);
 // exports.getAllUsers = factory.getAll(User);
+exports.getUser = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    return next(new AppError('No User found with that id', 404));
+  }
+  res.status(200).json({ status: 'success', data: user });
+});
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
   const { name } = req.query;
