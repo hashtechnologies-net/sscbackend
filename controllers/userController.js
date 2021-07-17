@@ -4,6 +4,7 @@ const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const factory = require('./handlerFactory');
+const APIFeatures = require('../utils/apiFeatures');
 
 const multerStorage = multer.memoryStorage();
 
@@ -106,7 +107,27 @@ exports.createUser = (req, res) => {
 };
 
 exports.getUser = factory.getOne(User);
-exports.getAllUsers = factory.getAll(User);
+// exports.getAllUsers = factory.getAll(User);
+
+exports.getAllUsers = catchAsync(async (req, res, next) => {
+  const { name } = req.query;
+
+  const regex = new RegExp(name, 'i');
+  // const users = await Hospital.find({ name: regex });
+  const features = new APIFeatures(User.find(), req.query)
+    .filter({ name: regex })
+    .sort()
+    .limitFields()
+    .paginate();
+  const users = await features.query;
+  const usersCount = await User.countDocuments();
+
+  return res.status(200).json({
+    status: 'success',
+    data: users,
+    usersCount,
+  });
+});
 
 // Do NOT update passwords with this!
 exports.updateUser = factory.updateOne(User);

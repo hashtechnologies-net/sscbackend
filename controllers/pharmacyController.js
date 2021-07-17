@@ -2,10 +2,11 @@ const Pharmacy = require('../models/pharmacyModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const APIFeatures = require('./../utils/apiFeatures');
-const multer = require('multer');
 const sharp = require('sharp');
-
 const path = require('path');
+
+const multer = require('multer');
+
 
 const multerStorage = multer.memoryStorage();
 
