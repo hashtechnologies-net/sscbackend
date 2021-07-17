@@ -35,14 +35,15 @@ app.use('/api', limiter);
 // app.use(hpp());
 app.use(cors());
 // app.use(fileupload());
-const appointmentRouter = require('./routes/appointmentRoutes');
 
+const appointmentRouter = require('./routes/appointmentRoutes');
 const clinicRouter = require('./routes/clinicRoutes');
 const doctorRouter = require('./routes/doctorRoutes');
 const hospitalRouter = require('./routes/hospitalRoutes');
 const pathlabRouter = require('./routes/pathlabRoutes');
 const pharmacyRouter = require('./routes/pharmacyRoutes');
 const rentalRouter = require('./routes/rentalRoutes');
+const policyRouter = require('./routes/policyRoutes');
 const userRouter = require('./routes/userRoutes');
 const homeRouter = require('./routes/homeRoutes');
 const AppError = require('./utils/appError');
@@ -56,6 +57,7 @@ app.use('/api/v1/hospitals', hospitalRouter);
 app.use('/api/v1/pathlabs', pathlabRouter);
 app.use('/api/v1/pharmacy', pharmacyRouter);
 app.use('/api/v1/rentals', rentalRouter);
+app.use('/api/v1/policy', policyRouter);
 app.use('/api/v1/users', userRouter);
 
 app.all('*', (req, res, next) => {
