@@ -80,6 +80,10 @@ const policySchema = new mongoose.Schema(
       type: String,
     },
     amount: { type: Number },
+    isPaid: {
+      type: Boolean,
+      default: false,
+    },
 
     slug: { type: String },
   },
