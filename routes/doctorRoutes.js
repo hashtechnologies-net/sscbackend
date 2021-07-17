@@ -5,17 +5,14 @@ const authController = require('./../controllers/authController');
 
 const router = express.Router();
 
-router.use(
-  doctorController.uploadDoctorPhoto,
-  doctorController.resizeDoctorPhoto
-);
-
 router
   .route('/')
   .get(doctorController.getAllDoctors)
   .post(
     authController.protect,
     authController.restrictTo('admin'),
+    doctorController.uploadDoctorPhoto,
+    doctorController.resizeDoctorPhoto,
     doctorController.createDoctor
   );
 
@@ -25,6 +22,8 @@ router
   .patch(
     authController.protect,
     authController.restrictTo('admin'),
+    doctorController.uploadDoctorPhoto,
+    doctorController.resizeDoctorPhoto,
     doctorController.updateDoctor
   )
   .delete(
