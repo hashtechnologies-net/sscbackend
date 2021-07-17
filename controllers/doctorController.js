@@ -25,10 +25,10 @@ exports.uploadDoctorPhoto = upload.single('photo');
 exports.resizeDoctorPhoto = catchAsync(async (req, res, next) => {
   if (!req.file) return next();
 
-  req.file.filename = `doctor-${req.user.id}-${Date.now()}.jpeg`;
+  req.file.filename = `doctor-${req.body.name}-${Date.now()}.jpeg`;
 
   await sharp(req.file.buffer)
-    .resize(500, 500)
+    .resize(800)
     .toFormat('jpeg')
     .jpeg({ quality: 90 })
     .toFile(`public/img/doctors/${req.file.filename}`);

@@ -22,27 +22,59 @@ const upload = multer({
   fileFilter: multerFilter,
 });
 
-exports.uploadPharmacyPhoto = upload.single('photo');
+const uploadFiles = upload.array('citizenships', 2);
 
-exports.resizePharmacyPhoto = catchAsync(async (req, res, next) => {
-  if (!req.file) return next();
+exports.uploadImages = (req, res, next) => {
+  uploadFiles(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      // A Multer error occurred when uploading.
+      return new AppError(`A Multer error occurred when uploading.`, 400);
 
-  req.file.filename = `pharmacy-${req.user.id}-${Date.now()}.jpeg`;
+      if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+        // Too many images exceeding the allowed limit
+        return new AppError(`Too many images exceeding the allowed limit`, 500);
+      }
+    } else if (err) {
+      return new AppError(`Something went wrong while uploading`, 500);
+      // handle other errors
+    }
 
-  await sharp(req.file.buffer)
-    .resize(500, 500)
-    .toFormat('jpeg')
-    .jpeg({ quality: 90 })
-    .toFile(`public/img/pharmacies/${req.file.filename}`);
+    // Everything is ok.
+    next();
+  });
+};
+exports.resizePolicyPhoto = catchAsync(async (req, res, next) => {
+  if (!req.files) return next();
+  req.body.images = [];
 
-  req.body.photo = `${req.protocol}://${req.get('host')}/img/pharmacies/${
-    req.file.filename
-  }`;
+  await Promise.all(
+    req.files.map(async (file) => {
+      const newFilename = `citizenship-${
+        req.body.first_name
+      }-${Date.now()}.jpeg`;
 
+      await sharp(file.buffer)
+        .resize(800)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90 })
+        .toFile(`public/img/citizenships/${newFilename}`);
+
+      req.body.images.push(newFilename);
+    })
+  );
   next();
 });
 
 exports.createPolicy = catchAsync(async (req, res, next) => {
+  const images = [...req.body.images];
+  console.log(images);
+  req.body.citizenship_front = `${req.protocol}://${req.get(
+    'host'
+  )}/img/citizenships/${images[0]}`;
+  req.body.citizenship_back = `${req.protocol}://${req.get(
+    'host'
+  )}/img/citizenships/${images[1]}`;
+
   newPolicy = await Policy.create(req.body);
   res.status(201).json({ status: 'success', data: newPolicy });
 });

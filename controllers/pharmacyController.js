@@ -7,7 +7,6 @@ const path = require('path');
 
 const multer = require('multer');
 
-
 const multerStorage = multer.memoryStorage();
 
 const multerFilter = (req, file, cb) => {
@@ -28,10 +27,10 @@ exports.uploadPharmacyPhoto = upload.single('photo');
 exports.resizePharmacyPhoto = catchAsync(async (req, res, next) => {
   if (!req.file) return next();
 
-  req.file.filename = `pharmacy-${req.user.id}-${Date.now()}.jpeg`;
+  req.file.filename = `pharmacy-${req.body.name}-${Date.now()}.jpeg`;
 
   await sharp(req.file.buffer)
-    .resize(500, 500)
+    .resize(800)
     .toFormat('jpeg')
     .jpeg({ quality: 90 })
     .toFile(`public/img/pharmacies/${req.file.filename}`);
