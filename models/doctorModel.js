@@ -10,31 +10,34 @@ const doctorSchema = new mongoose.Schema(
     },
     city: {
       type: String,
-      required: [true, 'A doctor must have a city'],
     },
     province: {
       type: String,
-      required: [true, 'A doctor must have a province'],
     },
     district: {
       type: String,
-      required: [true, 'A doctor must have a district'],
     },
     country: {
       type: String,
       default: 'Nepal',
     },
-    type: {
+    degree: {
       type: String,
-      required: [true, 'A doctor must have a type'],
+      required: [true, 'A doctor must have a degree'],
     },
     photo: {
       type: String,
     },
 
-    website: {
+    specialities: {
       type: String,
-      default: 'Not available',
+      required: [true, 'A doctor must have a specialization'],
+    },
+    hospital: {
+      type: String,
+    },
+    email_phone: {
+      type: String,
     },
     slug: String,
   },
