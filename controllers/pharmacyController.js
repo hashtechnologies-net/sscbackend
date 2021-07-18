@@ -58,42 +58,21 @@ exports.createPharmacy = catchAsync(async (req, res, next) => {
 
 exports.getAllPharmacy = catchAsync(async (req, res, next) => {
   const { name } = req.query;
-  if (name) {
-    const regex = new RegExp(name, 'i');
-    const features = new APIFeatures(Pharmacy.find(), req.query)
-      .filter({ name: regex })
-      .sort()
-      .limitFields()
-      .paginate();
-    const pharmacy = await features.query;
-    const pharmacyCount = await Pharmacy.countDocuments();
 
-    return res.status(200).json({
-      status: 'success',
-      data: pharmacy,
-      pharmacyCount,
-    });
-  } else {
-    const { page, limit } = req.query;
+  const regex = new RegExp(name, 'i');
+  const features = new APIFeatures(Pharmacy.find(), req.query)
+    .filter({ name: regex })
+    .sort()
+    .limitFields()
+    .paginate();
+  const pharmacy = await features.query;
+  const pharmacyCount = await Pharmacy.countDocuments();
 
-    const options = {
-      page: parseInt(page, 10) || 1,
-      limit: parseInt(limit, 10) || 100,
-    };
-
-    const paginate = await Pharmacy.paginate({}, options);
-
-    return res.status(200).json({
-      status: 'success',
-      data: paginate.docs,
-      paginate: {
-        total: paginate.total,
-        limit: paginate.limit,
-        page: paginate.page,
-        pages: paginate.pages,
-      },
-    });
-  }
+  return res.status(200).json({
+    status: 'success',
+    data: pharmacy,
+    pharmacyCount,
+  });
 });
 
 exports.getPharmacy = catchAsync(async (req, res, next) => {

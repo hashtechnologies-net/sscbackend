@@ -55,17 +55,9 @@ exports.createPathlab = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllPathlabs = catchAsync(async (req, res, next) => {
-  //   const hospitals = await Hospital.find({
-  //     name: { $regex: `${req.query.name}`, $options: 'i' },
-  //   });
-  //   return res.status(200).json({ results: hospitals.length, data: hospitals });
-  // });
-  // // find({ EmployeeName: { $regex: 'Gu', $options: 'i' } });
-
   const { name } = req.query;
 
   const regex = new RegExp(name, 'i');
-  // const pathlabs = await Pathlab.find({ name: regex });
   const features = new APIFeatures(Pathlab.find(), req.query)
     .filter({ name: regex })
     .sort()
