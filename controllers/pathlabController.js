@@ -63,43 +63,22 @@ exports.getAllPathlabs = catchAsync(async (req, res, next) => {
   // // find({ EmployeeName: { $regex: 'Gu', $options: 'i' } });
 
   const { name } = req.query;
-  if (name) {
-    const regex = new RegExp(name, 'i');
-    // const pathlabs = await Pathlab.find({ name: regex });
-    const features = new APIFeatures(Pathlab.find(), req.query)
-      .filter({ name: regex })
-      .sort()
-      .limitFields()
-      .paginate();
-    const pathlabs = await features.query;
-    const pathlabsCount = await Pathlab.countDocuments();
 
-    return res.status(200).json({
-      status: 'success',
-      data: pathlabs,
-      pathlabsCount,
-    });
-  } else {
-    const { page, limit } = req.query;
+  const regex = new RegExp(name, 'i');
+  // const pathlabs = await Pathlab.find({ name: regex });
+  const features = new APIFeatures(Pathlab.find(), req.query)
+    .filter({ name: regex })
+    .sort()
+    .limitFields()
+    .paginate();
+  const pathlabs = await features.query;
+  const pathlabsCount = await Pathlab.countDocuments();
 
-    const options = {
-      page: parseInt(page, 10) || 1,
-      limit: parseInt(limit, 10) || 100,
-    };
-
-    const paginate = await Pathlab.paginate({}, options);
-
-    return res.status(200).json({
-      status: 'success',
-      data: paginate.docs,
-      paginate: {
-        total: paginate.total,
-        limit: paginate.limit,
-        page: paginate.page,
-        pages: paginate.pages,
-      },
-    });
-  }
+  return res.status(200).json({
+    status: 'success',
+    data: pathlabs,
+    pathlabsCount,
+  });
 });
 
 exports.getPathlab = catchAsync(async (req, res, next) => {
