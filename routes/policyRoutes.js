@@ -16,20 +16,20 @@ router
     policyController.createPolicy
   );
 
-// router
-//   .route('/:id')
-//   .get(policyController.getPolicy)
-//   .patch(
-//     authController.protect,
-//     authController.restrictTo('admin'),
-//     policyController.uploadImages,
-//     policyController.resizePolicyPhoto,
-//     policyController.updatePolicy
-//   )
-//   .delete(
-//     authController.protect,
-//     authController.restrictTo('admin'),
-//     policyController.deletePolicy
-//   );
+router
+  .route('/:id')
+  .get(policyController.getPolicy)
+  .patch(
+    authController.protect,
+    authController.restrictTo('admin'),
+    policyController.uploadImages,
+    policyController.resizePolicyPhoto,
+    policyController.updatePolicy
+  )
+  .delete(
+    authController.protect,
+    authController.restrictTo('admin'),
+    policyController.deletePolicy
+  );
 
 module.exports = router;
