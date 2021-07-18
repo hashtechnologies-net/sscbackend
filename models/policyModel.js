@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const mongoosePaginate = require('mongoose-paginate');
 
 const policySchema = new mongoose.Schema(
   {
@@ -97,7 +96,6 @@ policySchema.pre('save', function (next) {
   next();
 });
 
-policySchema.plugin(mongoosePaginate);
 const Policy = mongoose.model('Policy', policySchema);
 
 module.exports = Policy;

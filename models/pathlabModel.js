@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const mongoosePaginate = require('mongoose-paginate');
 
 const pathlabSchema = new mongoose.Schema(
   {
@@ -54,7 +53,7 @@ pathlabSchema.pre('save', function (next) {
   next();
 });
 
-pathlabSchema.plugin(mongoosePaginate);
+
 const Pathlab = mongoose.model('Pathlab', pathlabSchema);
 
 module.exports = Pathlab;

@@ -56,67 +56,22 @@ exports.createClinic = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllClinics = catchAsync(async (req, res, next) => {
-  //   const hospitals = await Hospital.find({
-  //     name: { $regex: `${req.query.name}`, $options: 'i' },
-  //   });
-  //   return res.status(200).json({ results: hospitals.length, data: hospitals });
-  // });
-  // // find({ EmployeeName: { $regex: 'Gu', $options: 'i' } });
-
-  // Old Code , New is refactored
-  //   const { name } = req.query;
-  //   const regex = new RegExp(name, 'i');
-  //   const features = new APIFeatures(Clinic.find(), req.query)
-  //     .filter({ name: regex })
-  //     .sort()
-  //     .limitFields()
-  //     .paginate();
-  //   const clinics = await features.query;
-  //   return res.status(200).json({
-  //     status: 'success',
-  //     results: clinics.length,
-  //     data: clinics,
-  //   });
-  // });
-
   const { name } = req.query;
-  if (name) {
-    const regex = new RegExp(name, 'i');
-    // const hospitals = await Hospital.find({ name: regex });
-    const features = new APIFeatures(Clinic.find(), req.query)
-      .filter({ name: regex })
-      .sort()
-      .limitFields()
-      .paginate();
-    const clinics = await features.query;
-    const clinicsCount = await Clinic.countDocuments();
 
-    return res.status(200).json({
-      status: 'success',
-      data: clinics,
-      clinicsCount,
-    });
-  } else {
-    const { page, limit } = req.query;
+  const regex = new RegExp(name, 'i');
+  const features = new APIFeatures(Clinic.find(), req.query)
+    .filter({ name: regex })
+    .sort()
+    .limitFields()
+    .paginate();
+  const clinics = await features.query;
+  const clinicsCount = await Clinic.countDocuments();
 
-    const options = {
-      page: parseInt(page, 10) || 1,
-      limit: parseInt(limit, 10) || 100,
-    };
-
-    const paginate = await Clinic.paginate({}, options);
-
-    return res.status(200).json({
-      status: 'success',
-      data: paginate.docs,
-      paginate: {
-        total: paginate.total,
-        limit: paginate.limit,
-        page: paginate.page,
-        pages: paginate.pages,
-      },
-    });
-  }
+  return res.status(200).json({
+    status: 'success',
+    data: clinics,
+    clinicsCount,
+  });
 });
 
 exports.getClinic = catchAsync(async (req, res, next) => {

@@ -70,43 +70,22 @@ exports.getAllHospitals = catchAsync(async (req, res, next) => {
   // const hospitals = await Hospital.find({ name: regex });
 
   const { name } = req.query;
-  if (name) {
-    const regex = new RegExp(name, 'i');
-    // const hospitals = await Hospital.find({ name: regex });
-    const features = new APIFeatures(Hospital.find(), req.query)
-      .filter({ name: regex })
-      .sort()
-      .limitFields()
-      .paginate();
-    const hospitals = await features.query;
-    const hospitalsCount = await Hospital.countDocuments();
 
-    return res.status(200).json({
-      status: 'success',
-      data: hospitals,
-      hospitalsCount,
-    });
-  } else {
-    const { page, limit } = req.query;
+  const regex = new RegExp(name, 'i');
 
-    const options = {
-      page: parseInt(page, 10) || 1,
-      limit: parseInt(limit, 10) || 100,
-    };
+  const features = new APIFeatures(Hospital.find(), req.query)
+    .filter({ name: regex })
+    .sort()
+    .limitFields()
+    .paginate();
+  const hospitals = await features.query;
+  const hospitalsCount = await Hospital.countDocuments();
 
-    const paginate = await Hospital.paginate({}, options);
-
-    return res.status(200).json({
-      status: 'success',
-      data: paginate.docs,
-      paginate: {
-        total: paginate.total,
-        limit: paginate.limit,
-        page: paginate.page,
-        pages: paginate.pages,
-      },
-    });
-  }
+  return res.status(200).json({
+    status: 'success',
+    data: hospitals,
+    hospitalsCount,
+  });
 });
 
 exports.getHospital = catchAsync(async (req, res, next) => {

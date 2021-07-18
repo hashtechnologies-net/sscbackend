@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 
-const mongoosePaginate = require('mongoose-paginate');
 
 const hospitalSchema = new mongoose.Schema(
   {
@@ -55,7 +54,7 @@ hospitalSchema.pre('save', function (next) {
   next();
 });
 
-hospitalSchema.plugin(mongoosePaginate);
+
 const Hospital = mongoose.model('Hospital', hospitalSchema);
 
 module.exports = Hospital;

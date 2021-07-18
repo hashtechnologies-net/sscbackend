@@ -81,44 +81,23 @@ exports.createPolicy = catchAsync(async (req, res, next) => {
 
 exports.getAllPolicy = catchAsync(async (req, res, next) => {
   const { first_name, middle_name, last_name } = req.query;
-  if (first_name || middle_name || last_name) {
-    const regex = new RegExp(first_name, 'i');
-    const regex2 = new RegExp(middle_name, 'i');
-    const regex3 = new RegExp(last_name, 'i');
-    const features = new APIFeatures(Policy.find(), req.query)
-      .filter({ first_name: regex, middle_name: regex2, last_name: regex3 })
-      .sort()
-      .limitFields()
-      .paginate();
-    const policy = await features.query;
-    const policyCount = await Policy.countDocuments();
 
-    return res.status(200).json({
-      status: 'success',
-      data: policy,
-      policyCount,
-    });
-  } else {
-    const { page, limit } = req.query;
+  const regex = new RegExp(first_name, 'i');
+  const regex2 = new RegExp(middle_name, 'i');
+  const regex3 = new RegExp(last_name, 'i');
+  const features = new APIFeatures(Policy.find(), req.query)
+    .filter({ first_name: regex, middle_name: regex2, last_name: regex3 })
+    .sort()
+    .limitFields()
+    .paginate();
+  const policy = await features.query;
+  const policyCount = await Policy.countDocuments();
 
-    const options = {
-      page: parseInt(page, 10) || 1,
-      limit: parseInt(limit, 10) || 100,
-    };
-
-    const paginate = await Policy.paginate({}, options);
-
-    return res.status(200).json({
-      status: 'success',
-      data: paginate.docs,
-      paginate: {
-        total: paginate.total,
-        limit: paginate.limit,
-        page: paginate.page,
-        pages: paginate.pages,
-      },
-    });
-  }
+  return res.status(200).json({
+    status: 'success',
+    data: policy,
+    policyCount,
+  });
 });
 
 exports.getPolicy = catchAsync(async (req, res, next) => {
