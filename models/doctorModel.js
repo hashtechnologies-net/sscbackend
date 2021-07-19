@@ -27,7 +27,9 @@ const doctorSchema = new mongoose.Schema(
     photo: {
       type: String,
     },
-
+    nmc_number: {
+      type: String,
+    },
     specialities: {
       type: String,
       required: [true, 'A doctor must have a specialization'],
@@ -42,7 +44,6 @@ const doctorSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 
 doctorSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });

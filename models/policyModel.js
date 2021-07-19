@@ -78,7 +78,7 @@ const policySchema = new mongoose.Schema(
     spouse_name: {
       type: String,
     },
-    amount: { type: Number },
+    amount: { type: String },
     isPaid: {
       type: Boolean,
       default: false,

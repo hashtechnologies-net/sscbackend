@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 
-
 const hospitalSchema = new mongoose.Schema(
   {
     name: {
@@ -33,10 +32,10 @@ const hospitalSchema = new mongoose.Schema(
     },
     phone: {
       type: Number,
+      default: 'Not available',
     },
     openTime: {
       type: String,
-      required: [true, 'A hospital must have an opening time'],
       default: 'Open 24 hours',
     },
     website: {
@@ -44,7 +43,8 @@ const hospitalSchema = new mongoose.Schema(
       default: 'Not available',
     },
     slug: String,
-    description: { type: String, minLength: 500 },
+    services: String,
+    description: String,
   },
   { timestamps: true }
 );
@@ -53,7 +53,6 @@ hospitalSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
-
 
 const Hospital = mongoose.model('Hospital', hospitalSchema);
 

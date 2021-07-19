@@ -67,7 +67,7 @@ exports.resizePolicyPhoto = catchAsync(async (req, res, next) => {
 
 exports.createPolicy = catchAsync(async (req, res, next) => {
   const images = [...req.body.images];
-  console.log(images);
+  
   req.body.citizenship_front = `${req.protocol}://${req.get(
     'host'
   )}/img/citizenships/${images[0]}`;
