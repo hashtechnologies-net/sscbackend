@@ -4,6 +4,7 @@ const catchAsync = require('../utils/catchAsync');
 const APIFeatures = require('../utils/apiFeatures');
 const sharp = require('sharp');
 const path = require('path');
+sscCardNumberGenerator = require('creditcard-generator');
 
 const multer = require('multer');
 
@@ -67,14 +68,14 @@ exports.resizePolicyPhoto = catchAsync(async (req, res, next) => {
 
 exports.createPolicy = catchAsync(async (req, res, next) => {
   const images = [...req.body.images];
-  
+
   req.body.citizenship_front = `${req.protocol}://${req.get(
     'host'
   )}/img/citizenships/${images[0]}`;
   req.body.citizenship_back = `${req.protocol}://${req.get(
     'host'
   )}/img/citizenships/${images[1]}`;
-
+  req.body.card_number = sscCardNumberGenerator.GenCC().toString();
   newPolicy = await Policy.create(req.body);
   res.status(201).json({ status: 'success', data: newPolicy });
 });

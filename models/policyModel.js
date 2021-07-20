@@ -83,7 +83,9 @@ const policySchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-
+    card_number: {
+      type:String
+    },
     slug: { type: String },
   },
   { timestamps: true }

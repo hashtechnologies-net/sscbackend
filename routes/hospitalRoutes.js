@@ -10,9 +10,9 @@ router
   .get(hospitalController.getAllHospitals)
   .post(
     authController.protect,
+    authController.restrictTo('admin'),
     hospitalController.uploadHospitalPhoto,
     hospitalController.resizeHospitalPhoto,
-    authController.restrictTo('admin'),
     hospitalController.createHospital
   );
 
