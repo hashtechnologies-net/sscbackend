@@ -39,18 +39,12 @@ router
     authController.protect,
     authController.restrictTo('admin'),
     userController.getAllUsers
-  )
+  );
 
 router
   .route('/:id')
-  .get(
-    authController.protect,
-    authController.restrictTo('admin'),
-    userController.getUser
-  )
+  .get(userController.getUser)
   .patch(
-    authController.protect,
-    authController.restrictTo('admin'),
     userController.uploadUserPhoto,
     userController.resizeUserPhoto,
     userController.updateUser
