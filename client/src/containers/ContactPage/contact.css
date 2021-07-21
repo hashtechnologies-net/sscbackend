@@ -1,0 +1,9 @@
+.form-control {
+  background: transparent;
+  color: #212529;
+  border-color: #ced4da !important;
+}
+.form-control:hover {
+  color: #212529;
+  border-color: #007aff !important;
+}

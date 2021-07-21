@@ -14,6 +14,7 @@ const cors = require('cors');
 
 app.use(compression());
 app.use(express.json({ limit: '10kb' }));
+app.use(express.static(path.resolve(__dirname, 'client/build')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 if (process.env.NODE_ENV == 'development') {
@@ -48,7 +49,7 @@ const userRouter = require('./routes/userRoutes');
 const homeRouter = require('./routes/homeRoutes');
 const AppError = require('./utils/appError');
 
-app.use('/', homeRouter);
+// app.use('/', homeRouter);
 
 app.use('/api/v1/appointment', appointmentRouter);
 app.use('/api/v1/clinics', clinicRouter);
