@@ -1,0 +1,17 @@
+@media only screen and (max-width: 360px) {
+  .mision-vision-image img {
+    width: 300px;
+  }
+}
+
+@media only screen and (max-width: 486px) {
+  .mision-vision-image img {
+    width: 300px;
+  }
+}
+
+@media (max-width: 576px) {
+  .mision-vision-image img {
+    width: 300px;
+  }
+}

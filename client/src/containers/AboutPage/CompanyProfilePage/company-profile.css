@@ -1,0 +1,17 @@
+@media only screen and (max-width: 360px) {
+  .company-profile-image img {
+    width: 250px;
+  }
+}
+
+@media only screen and (max-width: 486px) {
+  .company-profile-image img {
+    width: 250px;
+  }
+}
+
+@media (max-width: 576px) {
+  .company-profile-image img {
+    width: 250px;
+  }
+}
