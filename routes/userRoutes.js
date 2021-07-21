@@ -34,17 +34,28 @@ router.patch(
 router.delete('/deleteMe', authController.protect, userController.deleteMe);
 
 router
-  .route('/')
+  .route('/admin')
   .get(
     authController.protect,
     authController.restrictTo('admin'),
     userController.getAllUsers
+  )
+  .post(
+    authController.protect,
+    authController.restrictTo('admin'),
+    userController.createUser
   );
 
 router
-  .route('/:id')
-  .get(userController.getUser)
+  .route('/admin/:id')
+  .get(
+    authController.protect,
+    authController.restrictTo('admin'),
+    userController.getUser
+  )
   .patch(
+    authController.protect,
+    authController.restrictTo('admin'),
     userController.uploadUserPhoto,
     userController.resizeUserPhoto,
     userController.updateUser
