@@ -9,8 +9,6 @@ router
   .route('/')
   .get(policyController.getAllPolicy)
   .post(
-    authController.protect,
-    authController.restrictTo('user', 'admin'),
     policyController.uploadImages,
     policyController.resizePolicyPhoto,
     policyController.createPolicy

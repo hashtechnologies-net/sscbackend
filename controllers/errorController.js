@@ -8,18 +8,17 @@ const handleCastErrorDB = (err) => {
 
 const handleDuplicateFieldsDB = (err) => {
   const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
-  console.log(value);
 
-  const message = `Duplicate field value: ${value}. Please try using some other value!`;
+  const message = `Duplicate field value entered: ${value}. Please try using some other value!`;
   return new AppError(message, 400);
 };
 
 const handleValidationErrorDB = (err) => {
-  // const errors = Object.values(err.errors).map((el) => el.message);
+  const errors = Object.values(err.errors).map((el) => el.message);
 
-  // const message = `Invalid data inserted. ${errors.join('. --')}`;
+  const message = `Invalid data inserted. ${errors.join('. ')}`;
 
-  const message = Object.values(err.errors).map((el) => el.message);
+  // const message = Object.values(err.errors).map((el) => el.message);
 
   return new AppError(message, 400);
 };
@@ -48,14 +47,13 @@ const sendErrorProd = (err, res) => {
   if (err.isOperational) {
     return res.status(err.statusCode).json({
       status: err.status,
-
       message: err.message,
     });
 
     // Programming or other unknown error: don't leak error details
   } else {
     // 1) Log error
-    console.error('ERROR ', err);
+    console.error('ERROR', err);
 
     // 2) Send generic message
     res.status(500).json({
@@ -74,7 +72,7 @@ module.exports = (err, req, res, next) => {
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === 'production') {
-    let error = { ...err };
+    let error = err;
 
     if (error.name === 'CastError') error = handleCastErrorDB(error);
     if (error.code === 11000) error = handleDuplicateFieldsDB(error);
@@ -85,6 +83,6 @@ module.exports = (err, req, res, next) => {
     if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
     if (error.name === 'MulterError') error = handleMulterError();
 
-    sendErrorProd(err, res);
+    sendErrorProd(error, res);
   }
 };

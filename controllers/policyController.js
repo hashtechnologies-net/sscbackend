@@ -23,7 +23,7 @@ const upload = multer({
   fileFilter: multerFilter,
 });
 
-const uploadFiles = upload.array('citizenships', 2);
+const uploadFiles = upload.array('citizenships', 3);
 
 exports.uploadImages = (req, res, next) => {
   uploadFiles(req, res, (err) => {
@@ -75,7 +75,12 @@ exports.createPolicy = catchAsync(async (req, res, next) => {
   req.body.citizenship_back = `${req.protocol}://${req.get(
     'host'
   )}/img/citizenships/${images[1]}`;
+  req.body.nominee_photo = `${req.protocol}://${req.get(
+    'host'
+  )}/img/citizenships/${images[2]}`;
+
   req.body.card_number = sscCardNumberGenerator.GenCC().toString();
+
   newPolicy = await Policy.create(req.body);
   res.status(201).json({ status: 'success', data: newPolicy });
 });
