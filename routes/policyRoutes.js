@@ -9,8 +9,7 @@ router
   .route('/')
   .get(policyController.getAllPolicy)
   .post(
-    policyController.uploadImages,
-    policyController.resizePolicyPhoto,
+    policyController.uploadPolicyPhoto,
     policyController.createPolicy
   );
 
@@ -20,8 +19,7 @@ router
   .patch(
     authController.protect,
     authController.restrictTo('admin'),
-    policyController.uploadImages,
-    policyController.resizePolicyPhoto,
+    policyController.uploadPolicyPhoto,
     policyController.updatePolicy
   )
   .delete(
