@@ -2,82 +2,100 @@ const Policy = require('../models/policyModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const APIFeatures = require('../utils/apiFeatures');
-const sharp = require('sharp');
+
 const path = require('path');
 sscCardNumberGenerator = require('creditcard-generator');
 
 const multer = require('multer');
 
-const multerStorage = multer.memoryStorage();
-
-const multerFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image')) {
-    cb(null, true);
-  } else {
-    cb(new AppError('Not an image! Please upload only images.', 400), false);
-  }
-};
-
-const upload = multer({
-  storage: multerStorage,
-  fileFilter: multerFilter,
-});
-
-const uploadFiles = upload.array('citizenships', 3);
-
-exports.uploadImages = (req, res, next) => {
-  uploadFiles(req, res, (err) => {
-    if (err instanceof multer.MulterError) {
-      // A Multer error occurred when uploading.
-      return new AppError(`A Multer error occurred when uploading.`, 400);
-
-      if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-        // Too many images exceeding the allowed limit
-        return new AppError(`Too many images exceeding the allowed limit`, 500);
-      }
-    } else if (err) {
-      return new AppError(`Something went wrong while uploading`, 500);
-      // handle other errors
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    if (file.fieldname === "citizenship_front") {
+      cb(null, 'public/img/policies/')
     }
-
-    // Everything is ok.
-    next();
-  });
-};
-exports.resizePolicyPhoto = catchAsync(async (req, res, next) => {
-  if (!req.files) return next();
-  req.body.images = [];
-
-  await Promise.all(
-    req.files.map(async (file) => {
-      const newFilename = `citizenship-${
-        req.body.first_name
-      }-${Date.now()}.jpeg`;
-
-      await sharp(file.buffer)
-        .resize(800)
-        .toFormat('jpeg')
-        .jpeg({ quality: 90 })
-        .toFile(`public/img/citizenships/${newFilename}`);
-
-      req.body.images.push(newFilename);
-    })
-  );
-  next();
+    else if (file.fieldname === "citizenship_back") {
+      cb(null, 'public/img/policies/');
+    }
+    else if (file.fieldname === "nominee_photo") {
+      cb(null, 'public/img/policies/')
+    }
+  },
+  filename: (req, file, cb) => {
+    if (file.fieldname === "citizenship_front") {
+      cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
+    }
+    else if (file.fieldname === "citizenship_back") {
+      cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
+    }
+    else if (file.fieldname === "nominee_photo") {
+      cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
+    }
+  }
 });
+
+
+function checkFileType(file, cb) {
+  if (file.fieldname === "citizenship_front") {
+    if (
+      file.mimetype === 'image/png' ||
+      file.mimetype === 'image/jpg' ||
+      file.mimetype === 'image/jpeg' ||
+      fiel.mimetype === 'image/gif'
+    ) {
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
+  }
+  else if (file.fieldname === "citizenship_back" || file.fieldname === "nominee_photo") {
+    if (
+      file.mimetype === 'image/png' ||
+      file.mimetype === 'image/jpg' ||
+      file.mimetype === 'image/jpeg' ||
+      fiel.mimetype === 'image/gif'
+    ) {
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
+  }
+}
+
+
+exports.uploadPolicyPhoto = multer({
+  storage: storage,
+  limits: {
+    fileSize: 1024 * 1024 * 10
+  },
+  fileFilter: (req, file, cb) => {
+    checkFileType(file, cb);
+  }
+}).fields(
+  [
+    {
+      name: 'citizenship_front',
+      maxCount: 1
+    },
+    {
+      name: 'citizenship_back', maxCount: 1
+    },
+    {
+      name: 'nominee_photo', maxCount: 1
+    }
+  ]
+);
+
+
+
+
+
 
 exports.createPolicy = catchAsync(async (req, res, next) => {
-  const images = [...req.body.images];
+  console.log(req.files)
 
-  req.body.citizenship_front = `${req.protocol}://${req.get(
-    'host'
-  )}/img/citizenships/${images[0]}`;
-  req.body.citizenship_back = `${req.protocol}://${req.get(
-    'host'
-  )}/img/citizenships/${images[1]}`;
-  req.body.nominee_photo = `${req.protocol}://${req.get(
-    'host'
-  )}/img/citizenships/${images[2]}`;
+  req.body.citizenship_front = `${req.files.citizenship_front[0].destination}${req.files.citizenship_front[0].filename}`;
+  req.body.citizenship_back = `${req.files.citizenship_back[0].destination}${req.files.citizenship_back[0].filename}`;
+  req.body.nominee_photo = `${req.files.nominee_photo[0].destination}${req.files.nominee_photo[0].filename}`;
 
   req.body.card_number = sscCardNumberGenerator.GenCC().toString();
 
