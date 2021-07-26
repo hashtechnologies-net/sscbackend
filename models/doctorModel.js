@@ -1,53 +1,56 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 
-const doctorSchema = new mongoose.Schema(
-  {
+const doctorSchema = new mongoose.Schema({
     name: {
-      type: String,
-      required: [true, 'A doctor must have a name'],
+        type: String,
+        required: [true, 'A doctor must have a name'],
     },
     city: {
-      type: String,
+        type: String,
+        required: [true, 'Please provide a city of the doctor'],
     },
     province: {
-      type: String,
+        type: String,
+        required: [true, 'Please provide a province of the doctor'],
     },
     district: {
-      type: String,
+        type: String,
+        required: [true, 'Please provide a district of the doctor'],
     },
     country: {
-      type: String,
-      default: 'Nepal',
+        type: String,
+        default: 'Nepal',
+        required: [true, 'Please provide a country of the doctor'],
     },
     degree: {
-      type: String,
-      required: [true, 'A doctor must have a degree'],
+        type: String,
+        required: [true, 'A doctor must have a degree'],
     },
     photo: {
-      type: String,
+        type: String,
     },
     nmc_number: {
-      type: String,
+        type: String,
+        required: [true, 'Please provide the nmc number of the doctor'],
     },
     specialities: {
-      type: String,
-      required: [true, 'A doctor must have a specialization'],
+        type: String,
+        required: [true, 'A doctor must have a specialization'],
     },
     hospital: {
-      type: String,
+        type: String,
     },
     email_phone: {
-      type: String,
+        type: String,
+        required: [true, 'Please provide an email or phone number of the doctor'],
     },
     slug: String,
-  },
-  { timestamps: true }
-);
+}, { timestamps: true });
 
-doctorSchema.pre('save', function (next) {
-  this.slug = slugify(this.name, { lower: true });
-  next();
+doctorSchema.pre('save', function(next) {
+    this.slug = slugify(this.name, { lower: true });
+    next();
 });
 const Doctor = mongoose.model('Doctor', doctorSchema);
 
