@@ -59,7 +59,6 @@ function checkFileType(file, cb) {
 }
 
 exports.uploadPolicyPhoto = (req, res, next) => {
-    // console.log(req.files);
     // if (!req.body.nominee_photo ||
     //     !req.body.citizenship_front ||
     //     !req.body.citizenship_back
@@ -113,7 +112,7 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
             400
         );
     }
-    console.log(req.files);
+
     if (req.files.citizenship_front) {
         req.body.citizenship_front = `${req.protocol}://${req.get(
       'host'
@@ -140,7 +139,6 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
         if (policyArray.length === 0) {
             isValidCardNo = false;
         }
-        console.log(policyArray);
     }
 
     newPolicy = await Policy.create(req.body);
