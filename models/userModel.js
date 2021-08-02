@@ -7,12 +7,12 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Please tell us your name!'],
+      // required: [true, 'Please tell us your name!'],
       trim: true,
     },
     email: {
       type: String,
-      required: [true, 'Please provide your email'],
+      // required: [true, 'Please provide your email'],
       trim: true,
       unique: [true, 'Email already taken'],
       lowercase: true,
@@ -20,6 +20,8 @@ const userSchema = new mongoose.Schema(
     },
     photo: {
       type: String,
+      unique: [true, 'Phone number already taken'],
+
     },
     otp: {
       type: Number,
@@ -33,7 +35,7 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, 'Please provide a password'],
+      // required: [true, 'Please provide a password'],
       minlength: [8, 'Password must be minimun of 8 lengths'],
       select: false,
     },

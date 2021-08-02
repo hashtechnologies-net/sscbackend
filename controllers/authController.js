@@ -9,7 +9,7 @@ const sendEmail = require('./../utils/email');
 const Joi = require('joi');
 const sendSMS = require('../utils/sendSMS');
 const bcrypt = require('bcrypt');
-
+var messagebird = require('messagebird')('OGhrTyNWwBBjh9O4SiDX5tJvL');
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
@@ -109,51 +109,96 @@ const createSendToken = (user, statusCode, req, res) => {
 
 exports.signup = catchAsync(async (req, res, next) => {
   const schema = Joi.object({
-    password: Joi.string()
-      .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
-      .required(),
-    email: Joi.string()
-      .email({
-        minDomainSegments: 2,
-        tlds: { allow: ['com', 'net'] },
-      })
-      .required(),
-    name: Joi.string().required(),
+    phone: Joi.number().required(),
   });
 
   const { error } = schema.validate({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
+    phone: req.body.phone,
   });
 
   if (error) {
     return next(new AppError(`${error.details[0].message}`, 403));
   }
-  const { email } = req.body;
+  const { phone } = req.body;
 
-  const userExists = await User.findOne({ email });
+  const userExists = await User.findOne({ phone });
 
   if (userExists) {
     return res.status(409).json({
       status: 'fail',
-      message: 'This email address is already associated with another account.',
+      message: 'This phone number is already associated with another account.',
     });
   }
 
-  let user = new User(req.body);
 
+  let user = new User({phone: phone});
   user = await user.save();
   createSendToken(user, 200, req, res);
 });
 
+exports.sendOTP =  catchAsync(async (req, res, next) => {
+  const schema = Joi.object({
+    phone: Joi.number().required(),
+  });
+
+  // console.log(req)
+
+  const { error } = schema.validate({
+    phone: req.body.phone,
+  });
+
+  if (error) {
+    return next(new AppError(`${error.details[0].message}`, 403));
+  }
+  const { phone } = req.body;
+
+  const userExists = await User.findOne({ phone });
+
+  if (userExists) {
+    return res.status(409).json({
+      status: 'fail',
+      message: 'This phone number is already associated with another account.',
+    });
+  }
+  if(phone){
+  var params = {
+    originator: 'SS Card'
+    };
+    messagebird.verify.create(phone, params, function (err, response) {
+    if (err) {
+      console.log(err);
+        if(err.statusCode===422){
+          return res.status(422).json({
+            status: 'fail',
+            message: 'Failed to send OTP',
+          });
+        }
+      }
+        if(response.status=='sent'){
+            return res.status(201).json({
+              "id":response.id,
+              "message":"OTP Sent",
+            });
+        }
+        return res.status(500).json({
+         
+          "message":"Internal server error",
+        });
+    });
+
+  }
+
+
+  // let user = new User(req.body);
+
+  // user = await user.save();
+  // createSendToken(user, 200, req, res);
+});
+
 exports.login = catchAsync(async (req, res, next) => {
   const schema = Joi.object({
-    password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')),
-    email: Joi.string().email({
-      minDomainSegments: 2,
-      tlds: { allow: ['com', 'net'] },
-    }),
+    password: Joi.string(),
+    email: Joi.string()
   });
 
   const { error } = schema.validate({
@@ -165,17 +210,17 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError(`${error.details[0].message}`, 403));
   }
 
-  const { email, password } = req.body;
+  const { phone, password } = req.body;
 
   // 1) Check if email and password exist
-  if (!email || !password) {
-    return next(new AppError('Please provide email and password!', 400));
+  if (!phone || !password) {
+    return next(new AppError('Please provide phone and password!', 400));
   }
   // 2) Check if user exists && password is correct
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ phone: phone }).select('+password');
 
   if (!user || !(await user.correctPassword(password, user.password))) {
-    return next(new AppError('Invalid email or password', 401));
+    return next(new AppError('Invalid phone or password', 401));
   }
 
   if (user.role === 'admin') {
@@ -184,7 +229,7 @@ exports.login = catchAsync(async (req, res, next) => {
   // if (!user.isVerified) {
   //   return res.status(401).send({
   //     status: 'fail',
-  //     message: 'Your Email has not been verified. Please click on resend',
+  //     message: 'Your phone has not been verified. Please click on resend',
   //   });
   // }
 
@@ -247,11 +292,13 @@ exports.loginAdmin = catchAsync(async (req, res, next) => {
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check of it's there
   let token;
+  console.log(req)
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+    console.log(token);
   }
   // else if (req.cookies.jwt) {
   //   token = req.cookies.jwt;
@@ -404,6 +451,22 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, req, res);
 });
 
+exports.setPassword = catchAsync(async (req, res, next) => {
+  // 1) Get user from collection
+  const user = await User.findById(req.user.id).select('+password');
+
+
+  // 3) If so, update password
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.isVerified = true;
+  await user.save();
+  // User.findByIdAndUpdate will NOT work as intended!
+
+  // 4) Log user in, send JWT
+  createSendToken(user, 200, req, res);
+});
+
 exports.updatePassword = catchAsync(async (req, res, next) => {
   // 1) Get user from collection
   const user = await User.findById(req.user.id).select('+password');
@@ -520,3 +583,21 @@ exports.resendCode = function (req, res, next) {
     }
   });
 };
+
+exports.verifOTP = function(req,res,next){
+  const { id, token } = req.body
+  messagebird.verify.verify(id, token, function (err, response) {
+    if (err) {
+      console.log(err.errors[0].description);
+      return res.status(422).json({
+        status: 'fail',
+        message: err.errors[0].description,
+      });
+    }
+    if(response.status=='verified'){
+      return res.status(201).json({
+        "message":"OTP Verified",
+      });
+  }
+  });
+}

@@ -5,6 +5,8 @@ const authController = require('./../controllers/authController');
 const router = express.Router();
 
 router.post('/signup', authController.signup);
+router.post('/signup/sendotp', authController.sendOTP);
+router.post('/signup/verify-otp', authController.verifOTP);
 router.post('/login', authController.login);
 router.post('/loginAdmin', authController.loginAdmin);
 
@@ -17,6 +19,12 @@ router.patch(
   '/updateMyPassword',
   authController.protect,
   authController.updatePassword
+);
+
+router.post(
+  '/setPassword',
+  authController.protect,
+  authController.setPassword
 );
 router.get(
   '/me',
