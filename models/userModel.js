@@ -15,13 +15,12 @@ const userSchema = new mongoose.Schema(
       // required: [true, 'Please provide your email'],
       trim: true,
       unique: [true, 'Email already taken'],
+      sparse:true,
       lowercase: true,
       validate: [validator.isEmail, 'Please provide a valid email'],
     },
     photo: {
       type: String,
-      unique: [true, 'Phone number already taken'],
-
     },
     otp: {
       type: Number,
@@ -59,6 +58,7 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: Number,
+      require:true,
     },
     province: {
       type: String,

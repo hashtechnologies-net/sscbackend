@@ -9,7 +9,7 @@ const sendEmail = require('./../utils/email');
 const Joi = require('joi');
 const sendSMS = require('../utils/sendSMS');
 const bcrypt = require('bcrypt');
-var messagebird = require('messagebird')('OGhrTyNWwBBjh9O4SiDX5tJvL');
+var messagebird = require('messagebird')(process.env.MESSAGEBIRD);
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
@@ -130,7 +130,6 @@ exports.signup = catchAsync(async (req, res, next) => {
     });
   }
 
-
   let user = new User({phone: phone});
   user = await user.save();
   createSendToken(user, 200, req, res);
@@ -146,12 +145,7 @@ exports.sendOTP =  catchAsync(async (req, res, next) => {
   const { error } = schema.validate({
     phone: req.body.phone,
   });
-
-  if (error) {
-    return next(new AppError(`${error.details[0].message}`, 403));
-  }
-  const { phone } = req.body;
-
+  let phone = req.body.phone;
   const userExists = await User.findOne({ phone });
 
   if (userExists) {
@@ -160,9 +154,15 @@ exports.sendOTP =  catchAsync(async (req, res, next) => {
       message: 'This phone number is already associated with another account.',
     });
   }
+
+  if (error) {
+    return next(new AppError(`${error.details[0].message}`, 403));
+  }
+ 
   if(phone){
+  phone = "+977"+phone;  
   var params = {
-    originator: 'SS Card'
+    originator: 'SSC_ALERT'
     };
     messagebird.verify.create(phone, params, function (err, response) {
     if (err) {

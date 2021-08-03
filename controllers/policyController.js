@@ -7,6 +7,7 @@ const path = require('path');
 sscCardNumberGenerator = require('creditcard-generator');
 
 const multer = require('multer');
+const { default: axios } = require('axios');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -131,6 +132,8 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
     )}/img/policies/${req.files.nominee_photo[0].filename}`;
     }
 
+    let invalid = true
+
     while (invalid) {
         req.body.card_number = sscCardNumberGenerator.GenCC().toString();
         const existPolicy =  await Policy.find({card_number: req.body.card_number})
@@ -168,7 +171,7 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
             text: MessageText
           }
           transporter.sendMail(mailData,(err,success)=>{
-            console.log(err,success)
+            // console.log(err,success)
           })
         }
       });

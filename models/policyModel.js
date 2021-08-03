@@ -71,7 +71,7 @@ const policySchema = new mongoose.Schema({
         ],
     },
     issued_date: {
-        type: Date,
+        type: String,
         required: [true, 'A policy holder must enter citizenship issued date.'],
     },
     issued_from: {
