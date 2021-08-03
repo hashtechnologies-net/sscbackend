@@ -7,14 +7,15 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Please tell us your name!'],
+      // required: [true, 'Please tell us your name!'],
       trim: true,
     },
     email: {
       type: String,
-      required: [true, 'Please provide your email'],
+      // required: [true, 'Please provide your email'],
       trim: true,
       unique: [true, 'Email already taken'],
+      sparse:true,
       lowercase: true,
       validate: [validator.isEmail, 'Please provide a valid email'],
     },
@@ -33,7 +34,7 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, 'Please provide a password'],
+      // required: [true, 'Please provide a password'],
       minlength: [8, 'Password must be minimun of 8 lengths'],
       select: false,
     },
@@ -57,6 +58,7 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: Number,
+      require:true,
     },
     province: {
       type: String,

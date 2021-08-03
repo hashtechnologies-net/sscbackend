@@ -2,11 +2,12 @@ const Policy = require('../models/policyModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const APIFeatures = require('../utils/apiFeatures');
-
+const nodemailer = require('nodemailer')
 const path = require('path');
 sscCardNumberGenerator = require('creditcard-generator');
 
 const multer = require('multer');
+const { default: axios } = require('axios');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -131,15 +132,62 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
     )}/img/policies/${req.files.nominee_photo[0].filename}`;
     }
 
-    let isValidCardNo = true;
-    while (isValidCardNo) {
-        req.body.card_number = sscCardNumberGenerator.GenCC().toString();
+    let invalid = true
 
-        policyArray = await Policy.find({ card_number: req.body.card_number });
-        if (policyArray.length === 0) {
-            isValidCardNo = false;
+    while (invalid) {
+        req.body.card_number = sscCardNumberGenerator.GenCC().toString();
+        const existPolicy =  await Policy.find({card_number: req.body.card_number})
+        invalid = (existPolicy.length > 0) ? true : false
+      }
+    
+      const userName = req.body.first_name+" "+req.body.last_name
+      const {amount, phone, email, card_number} = req.body
+    
+      const MessageText = `Dear ${userName}, Thankyou for subscribing SSCard.\n Card Type: ${amount} \n SSC Number: ${card_number}`
+    
+      if (email) {
+      
+      let transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 587,
+        service:"google",
+        auth: {
+          user: "campaigns@swasthyasamriddhi.com",
+          pass: "Campaigns@himitsu1"
+        },
+         
+    
+      });
+    
+      transporter.verify(function(error, success) {
+        if (error) {
+          console.log(error);
+        } else {
+          // console.log("Server is ready to take our messages");
+          let mailData = {
+            from: "Swasthya Samriddhi Card",
+            to: email,
+            subject: "Swasthya Samriddhi Card",
+            text: MessageText
+          }
+          transporter.sendMail(mailData,(err,success)=>{
+            // console.log(err,success)
+          })
         }
+      });
     }
+    
+     
+    
+    
+      if (phone) {
+        
+         axios.get(`http://api.sparrowsms.com/v2/sms?token=v2_omEJeBXDIfKjKngaclZLxK8igfa.mA85&from=Demo&to=${phone}&text=${MessageText}`).then(res=>{
+           if (res.data.response_code==200) {
+              console.log("Message sent");
+           }
+         }).catch(error=>console.log(error))
+      }
 
     newPolicy = await Policy.create(req.body);
     res.status(201).json({ status: 'success', data: newPolicy });
