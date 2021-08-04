@@ -198,11 +198,11 @@ exports.sendOTP =  catchAsync(async (req, res, next) => {
 exports.login = catchAsync(async (req, res, next) => {
   const schema = Joi.object({
     password: Joi.string(),
-    email: Joi.string()
+    phone: Joi.string()
   });
 
   const { error } = schema.validate({
-    email: req.body.email,
+    phone: req.body.phone,
     password: req.body.password,
   });
 
