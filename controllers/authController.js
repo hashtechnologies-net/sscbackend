@@ -110,16 +110,18 @@ const createSendToken = (user, statusCode, req, res) => {
 exports.signup = catchAsync(async (req, res, next) => {
   const schema = Joi.object({
     phone: Joi.number().required(),
+    password: Joi.string().required(),  
   });
 
   const { error } = schema.validate({
     phone: req.body.phone,
+    password: req.body.password
   });
 
   if (error) {
     return next(new AppError(`${error.details[0].message}`, 403));
   }
-  const { phone } = req.body;
+  const { phone, password } = req.body;
 
   const userExists = await User.findOne({ phone });
 
@@ -130,7 +132,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     });
   }
 
-  let user = new User({phone: phone});
+  let user = new User({phone: phone, password: password});
   user = await user.save();
   createSendToken(user, 200, req, res);
 });
