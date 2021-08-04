@@ -152,8 +152,8 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
         port: 587,
         service:"google",
         auth: {
-          user: "campaigns@swasthyasamriddhi.com",
-          pass: "Campaigns@himitsu1"
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASSWORD
         },
          
     
