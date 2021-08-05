@@ -11,7 +11,11 @@ router.post('/login', authController.login);
 router.post('/loginAdmin', authController.loginAdmin);
 
 router.post('/forgotPassword', authController.forgotPassword);
-router.patch('/resetPassword/:token', authController.resetPassword);
+router.post('/verifyNumber', authController.verifOTP);
+router.post('/changePassword', authController.setPassword);
+
+
+// router.patch('/resetPassword/:token', authController.resetPassword);
 
 // router.get('/confirmation/:phone/:token', authController.verifyNumber);
 
