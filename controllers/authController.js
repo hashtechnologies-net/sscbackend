@@ -132,7 +132,18 @@ exports.signup = catchAsync(async (req, res, next) => {
     });
   }
 
-  let user = new User({ phone: phone, password: password });
+  const phoneNumber = "+977"+req.body.phone;
+
+  const token = await Token.findOne({phone: phoneNumber});
+  if(!token){
+    return res.status(500).json({
+      "message":"User not verified",
+    });
+  }
+
+
+  let user = new User({phone: phone, password: password});
+
   user = await user.save();
   createSendToken(user, 200, req, res);
 });
@@ -160,38 +171,41 @@ exports.sendOTP = catchAsync(async (req, res, next) => {
   if (error) {
     return next(new AppError(`${error.details[0].message}`, 403));
   }
+ 
+  if(phone){
 
-  if (phone) {
-    phone = '+977' + phone;
-    var params = {
-      originator: 'SSC_ALERT',
+  phone = "+977"+phone;  
+  var params = {
+    originator: 'SSC_ALERT'
     };
-    messagebird.verify.create(phone, params, function (err, response) {
-      if (err) {
-        console.log(err);
-        if (err.statusCode === 422) {
+    messagebird.verify.create(phone, params, async function (err, response) {
+    if (err) {
+      // console.log(err);
+        if(err.statusCode===422){
+
           return res.status(422).json({
             status: 'fail',
             message: 'Failed to send OTP',
           });
         }
       }
-      if (response.status == 'sent') {
-        return res.status(201).json({
-          id: response.id,
-          message: 'OTP Sent',
+        if(response.status=='sent'){
+          let token = new Token({phone: phone, token: response.id});
+          token = await token.save();
+            return res.status(201).json({
+              "id":response.id,
+              "message":"OTP Sent",
+            })
+
+        }
+        return res.status(500).json({
+         
+          "message":"Internal server error",
+
         });
-      }
-      return res.status(500).json({
-        message: 'Internal server error',
       });
-    });
-  }
-
-  // let user = new User(req.body);
-
-  // user = await user.save();
-  // createSendToken(user, 200, req, res);
+    }
+  
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -333,13 +347,13 @@ exports.loginAdmin = catchAsync(async (req, res, next) => {
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check of it's there
   let token;
-  console.log(req);
+
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
-    console.log(token);
+    // console.log(token);
   }
   // else if (req.cookies.jwt) {
   //   token = req.cookies.jwt;
@@ -426,40 +440,61 @@ exports.restrictTo = (...roles) => {
 // Node js express  authentication and authorization middleware
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
-  // 1) Get user based on POSTed email
-  const user = await User.findOne({ email: req.body.email });
+  // 1) Get user based on POSTed phone
+  const user = await User.findOne({ phone: req.body.phone });
   if (!user) {
-    return next(new AppError('There is no user with email address.', 404));
+    return next(new AppError('There is no user with phone number.', 500));
   }
 
-  // 2) Generate the random reset token
-  const resetToken = user.createPasswordResetToken();
-  await user.save({ validateBeforeSave: false });
+  const token = await Token.findOne({phone: req.body.phone});
+  if (token) {
+    return next(new AppError('Wait for 2 minutes', 500));
+  }
 
-  // 3) Send it to user's email
+  // 2) Send OTP
   try {
-    const resetURL = `${req.protocol}://${req.get(
-      'host'
-    )}/api/v1/users/resetPassword/${resetToken}`;
+    
+    // console.log(req.body)
+    let { phone } = req.body
+    const phoneForToken = phone
+    if(phone){
+      phone = "+977"+phone;  
 
-    const message = `Forgot Your Password? Submit a Patch Request with your new password and PasswordConfirm to : ${resetURL} \n If you did not forget your password , please ignore this message.`;
-
-    await sendEmail({
-      email: user.email,
-      subject: 'Your password reset token valid for 10 minutes.',
-      message,
-    });
-    res.status(200).json({
-      status: 'success',
-      message: 'Token sent to email!',
-    });
+      var params = {
+        originator: 'SSC_ALERT'
+        };
+        messagebird.verify.create(phone, params, async function (err, response) {
+        if (err) {
+          // console.log(err);
+            if(err.statusCode===422){
+              return res.status(422).json({
+                status: 'fail',
+                message: 'Failed to send OTP',
+              });
+            }
+          }
+            if(response.status=='sent'){
+              let token = new Token({phone: phoneForToken, token: response.id});
+              token = await token.save();
+    
+                return res.status(201).json({
+                  "id":response.id,
+                  "message":"OTP Sent",
+                });
+            }
+            return res.status(500).json({
+              "message":"Internal server error",
+            });
+        });
+    
+      }
   } catch (err) {
-    user.passwordResetToken = undefined;
-    user.passwordResetExpires = undefined;
-    await user.save({ validateBeforeSave: false });
+    // user.passwordResetToken = undefined;
+    // user.passwordResetExpires = undefined;
+    // await user.save({ validateBeforeSave: false });
 
     return next(
-      new AppError('There was an error sending the email. Try again later!'),
+      new AppError('There was an error sending the OTP. Try again later!'),
       500
     );
   }
@@ -494,17 +529,28 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
 exports.setPassword = catchAsync(async (req, res, next) => {
   // 1) Get user from collection
-  const user = await User.findById(req.user.id).select('+password');
+  const token = await Token.findOne({token: req.body.token});
+  if(!token){
+    return res.status(500).json({
+      "message":"User not verified",
+    });
+  }else{
+  
+  const user = await User.findOne({phone: token.phone});
 
   // 3) If so, update password
   user.password = req.body.password;
   user.passwordConfirm = req.body.passwordConfirm;
   user.isVerified = true;
   await user.save();
-  // User.findByIdAndUpdate will NOT work as intended!
 
+  return res.status(200).json({
+    "message":"Password Saved",
+  });
+  // User.findByIdAndUpdate will NOT work as intended!
   // 4) Log user in, send JWT
-  createSendToken(user, 200, req, res);
+  // createSendToken(user, 200, req, res);
+  }
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -625,7 +671,7 @@ exports.verifOTP = function (req, res, next) {
   const { id, token } = req.body;
   messagebird.verify.verify(id, token, function (err, response) {
     if (err) {
-      console.log(err.errors[0].description);
+      // console.log(err.errors[0].description);
       return res.status(422).json({
         status: 'fail',
         message: err.errors[0].description,
@@ -635,6 +681,10 @@ exports.verifOTP = function (req, res, next) {
       return res.status(201).json({
         message: 'OTP Verified',
       });
-    }
+  }
+  return res.status(201).json({
+    response
+  });
+
   });
 };
