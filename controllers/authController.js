@@ -132,13 +132,14 @@ exports.signup = catchAsync(async (req, res, next) => {
     });
   }
 
-  const token = await Token.findOne({token: req.body.phone});
+  const phoneNumber = "+977"+req.body.phone;
+
+  const token = await Token.findOne({phone: phoneNumber});
   if(!token){
     return res.status(500).json({
       "message":"User not verified",
     });
   }
-
 
 
   let user = new User({phone: phone, password: password});
@@ -178,7 +179,7 @@ exports.sendOTP =  catchAsync(async (req, res, next) => {
     };
     messagebird.verify.create(phone, params, async function (err, response) {
     if (err) {
-      console.log(err);
+      // console.log(err);
         if(err.statusCode===422){
           return res.status(422).json({
             status: 'fail',
@@ -308,13 +309,13 @@ exports.loginAdmin = catchAsync(async (req, res, next) => {
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check of it's there
   let token;
-  console.log(req)
+  // console.log(req)
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
-    console.log(token);
+    // console.log(token);
   }
   // else if (req.cookies.jwt) {
   //   token = req.cookies.jwt;
@@ -408,7 +409,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
 
   const token = await Token.findOne({phone: req.body.phone});
-  if (!token) {
+  if (token) {
     return next(new AppError('Wait for 2 minutes', 500));
   }
 
@@ -417,6 +418,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     
     // console.log(req.body)
     let { phone } = req.body
+    const phoneForToken = phone
     if(phone){
       phone = "+977"+phone;  
 
@@ -425,7 +427,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
         };
         messagebird.verify.create(phone, params, async function (err, response) {
         if (err) {
-          console.log(err);
+          // console.log(err);
             if(err.statusCode===422){
               return res.status(422).json({
                 status: 'fail',
@@ -434,7 +436,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
             }
           }
             if(response.status=='sent'){
-              let token = new Token({phone: phone, token: response.id});
+              let token = new Token({phone: phoneForToken, token: response.id});
               token = await token.save();
     
                 return res.status(201).json({
@@ -504,6 +506,10 @@ exports.setPassword = catchAsync(async (req, res, next) => {
   user.passwordConfirm = req.body.passwordConfirm;
   user.isVerified = true;
   await user.save();
+
+  return res.status(200).json({
+    "message":"Password Saved",
+  });
   // User.findByIdAndUpdate will NOT work as intended!
   // 4) Log user in, send JWT
   // createSendToken(user, 200, req, res);
@@ -631,7 +637,7 @@ exports.verifOTP = function(req,res,next){
   const { id, token } = req.body
   messagebird.verify.verify(id, token, function (err, response) {
     if (err) {
-      console.log(err.errors[0].description);
+      // console.log(err.errors[0].description);
       return res.status(422).json({
         status: 'fail',
         message: err.errors[0].description,
@@ -642,5 +648,8 @@ exports.verifOTP = function(req,res,next){
         "message":"OTP Verified",
       });
   }
+  return res.status(201).json({
+    response
+  });
   });
 }
