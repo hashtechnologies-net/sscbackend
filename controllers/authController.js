@@ -195,8 +195,7 @@ exports.sendOTP = catchAsync(async (req, res, next) => {
             return res.status(201).json({
               "id":response.id,
               "message":"OTP Sent",
-            });
-
+            })
 
         }
         return res.status(500).json({
@@ -204,17 +203,9 @@ exports.sendOTP = catchAsync(async (req, res, next) => {
           "message":"Internal server error",
 
         });
-      }
-      return res.status(500).json({
-        message: 'Internal server error',
       });
-    });
-  }
-
-  // let user = new User(req.body);
-
-  // user = await user.save();
-  // createSendToken(user, 200, req, res);
+    }
+  
 });
 
 exports.login = catchAsync(async (req, res, next) => {
