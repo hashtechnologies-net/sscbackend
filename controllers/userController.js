@@ -119,13 +119,13 @@ exports.getUser = catchAsync(async (req, res, next) => {
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
   const { name } = req.query;
-  const { phone } = req.query;
+  const { email } = req.query;
 
   const regex = new RegExp(name, 'i');
-  const phoneRegex = new RegExp(phone, 'i');
+  const emailRegex = new RegExp(email, 'i');
   // const users = await Hospital.find({ name: regex });
   const features = new APIFeatures(User.find(), req.query)
-    .filter({ name: regex, phone: phoneRegex })
+    .filter({ name: regex, email: emailRegex })
     .sort()
     .limitFields()
     .paginate();
