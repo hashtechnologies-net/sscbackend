@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema(
       // required: [true, 'Please provide your email'],
       trim: true,
       unique: [true, 'Email already taken'],
-      sparse:true,
+      sparse: true,
       lowercase: true,
       validate: [validator.isEmail, 'Please provide a valid email'],
     },
@@ -58,7 +58,7 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: Number,
-      require:true,
+      required: true,
     },
     province: {
       type: String,

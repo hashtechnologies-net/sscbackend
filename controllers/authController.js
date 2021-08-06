@@ -110,12 +110,12 @@ const createSendToken = (user, statusCode, req, res) => {
 exports.signup = catchAsync(async (req, res, next) => {
   const schema = Joi.object({
     phone: Joi.number().required(),
-    password: Joi.string().required(),  
+    password: Joi.string().required(),
   });
 
   const { error } = schema.validate({
     phone: req.body.phone,
-    password: req.body.password
+    password: req.body.password,
   });
 
   if (error) {
@@ -143,11 +143,12 @@ exports.signup = catchAsync(async (req, res, next) => {
 
 
   let user = new User({phone: phone, password: password});
+
   user = await user.save();
   createSendToken(user, 200, req, res);
 });
 
-exports.sendOTP =  catchAsync(async (req, res, next) => {
+exports.sendOTP = catchAsync(async (req, res, next) => {
   const schema = Joi.object({
     phone: Joi.number().required(),
   });
@@ -181,6 +182,7 @@ exports.sendOTP =  catchAsync(async (req, res, next) => {
     if (err) {
       // console.log(err);
         if(err.statusCode===422){
+
           return res.status(422).json({
             status: 'fail',
             message: 'Failed to send OTP',
@@ -200,11 +202,14 @@ exports.sendOTP =  catchAsync(async (req, res, next) => {
         return res.status(500).json({
          
           "message":"Internal server error",
+
         });
+      }
+      return res.status(500).json({
+        message: 'Internal server error',
+      });
     });
-
   }
-
 
   // let user = new User(req.body);
 
@@ -215,7 +220,7 @@ exports.sendOTP =  catchAsync(async (req, res, next) => {
 exports.login = catchAsync(async (req, res, next) => {
   const schema = Joi.object({
     password: Joi.string(),
-    phone: Joi.string()
+    phone: Joi.string(),
   });
 
   const { error } = schema.validate({
@@ -256,15 +261,12 @@ exports.login = catchAsync(async (req, res, next) => {
 
 exports.loginAdmin = catchAsync(async (req, res, next) => {
   const schema = Joi.object({
-    password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')),
-    email: Joi.string().email({
-      minDomainSegments: 2,
-      tlds: { allow: ['com', 'net'] },
-    }),
+    password: Joi.string(),
+    phone: Joi.string(),
   });
 
   const { error } = schema.validate({
-    email: req.body.email,
+    phone: req.body.phone,
     password: req.body.password,
   });
 
@@ -272,17 +274,17 @@ exports.loginAdmin = catchAsync(async (req, res, next) => {
     return next(new AppError(`${error.details[0].message}`, 403));
   }
 
-  const { email, password } = req.body;
+  const { phone, password } = req.body;
 
   // 1) Check if email and password exist
-  if (!email || !password) {
-    return next(new AppError('Please provide email and password!', 400));
+  if (!phone || !password) {
+    return next(new AppError('Please provide phone and password!', 400));
   }
   // 2) Check if user exists && password is correct
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ phone: phone }).select('+password');
 
   if (!user || !(await user.correctPassword(password, user.password))) {
-    return next(new AppError('Incorrect email or password', 401));
+    return next(new AppError('Invalid phone or password', 401));
   }
 
   if (user.role !== 'admin') {
@@ -309,7 +311,7 @@ exports.loginAdmin = catchAsync(async (req, res, next) => {
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check of it's there
   let token;
-  // console.log(req)
+
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
@@ -497,7 +499,6 @@ exports.setPassword = catchAsync(async (req, res, next) => {
       "message":"User not verified",
     });
   }else{
-
   
   const user = await User.findOne({phone: token.phone});
 
@@ -543,8 +544,7 @@ exports.verifyNumber = function (req, res, next) {
     // token is not found into database i.e. token may have expired
     if (!token) {
       return res.status(400).send({
-        msg:
-          'Your verification code may have expired. Please click on resend for verify your number.',
+        msg: 'Your verification code may have expired. Please click on resend for verify your number.',
       });
     }
     // if token is found then check valid user
@@ -555,8 +555,7 @@ exports.verifyNumber = function (req, res, next) {
           // not valid user
           if (!user) {
             return res.status(401).send({
-              msg:
-                'We were unable to find a user for this verification. Please SignUp!',
+              msg: 'We were unable to find a user for this verification. Please SignUp!',
             });
           }
           // user is already verified
@@ -593,8 +592,7 @@ exports.resendCode = function (req, res, next) {
     // user is not found into database
     if (!user) {
       return res.status(400).send({
-        msg:
-          'We were unable to find a user with that phone. Make sure your Phone number is correct!',
+        msg: 'We were unable to find a user with that phone. Make sure your Phone number is correct!',
       });
     }
     // user has been already verified
@@ -633,8 +631,8 @@ exports.resendCode = function (req, res, next) {
   });
 };
 
-exports.verifOTP = function(req,res,next){
-  const { id, token } = req.body
+exports.verifOTP = function (req, res, next) {
+  const { id, token } = req.body;
   messagebird.verify.verify(id, token, function (err, response) {
     if (err) {
       // console.log(err.errors[0].description);
@@ -643,13 +641,14 @@ exports.verifOTP = function(req,res,next){
         message: err.errors[0].description,
       });
     }
-    if(response.status=='verified'){
+    if (response.status == 'verified') {
       return res.status(201).json({
-        "message":"OTP Verified",
+        message: 'OTP Verified',
       });
   }
   return res.status(201).json({
     response
   });
+
   });
-}
+};

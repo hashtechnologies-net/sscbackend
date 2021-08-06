@@ -10,6 +10,7 @@ const tokenSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
     index: { expireAfterSeconds: 60 },
+
   },
 });
 
