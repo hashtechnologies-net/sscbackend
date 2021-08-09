@@ -60,7 +60,7 @@ function checkFileType(file, cb) {
 }
 
 exports.uploadPolicyPhoto = (req, res, next) => {
-    console.log(req.body)
+    // console.log(req.body)
     // if (!req.body.nominee_photo ||
     //     !req.body.citizenship_front ||
     //     !req.body.citizenship_back
@@ -145,7 +145,8 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
       const {amount, phone, email, card_number} = req.body
     
       const MessageText = `Dear ${userName}, Thankyou for subscribing SSCard.\n Card Type: ${amount} \n SSC Number: ${card_number}`
-    
+      newPolicy = await Policy.create(req.body);
+      if(newPolicy){
       if (email) {
       
       let transporter = nodemailer.createTransport({
@@ -164,7 +165,7 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
         if (error) {
           console.log(error);
         } else {
-          // console.log("Server is ready to take our messages");
+          console.log("Server is ready to take our messages");
           let mailData = {
             from: "Swasthya Samriddhi Card",
             to: email,
@@ -172,14 +173,11 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
             text: MessageText
           }
           transporter.sendMail(mailData,(err,success)=>{
-            // console.log(err,success)
+            console.log(err,success)
           })
         }
       });
     }
-    
-     
-    
     
       if (phone) {
         
@@ -190,8 +188,10 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
          }).catch(error=>console.log(error))
       }
 
-    newPolicy = await Policy.create(req.body);
+  
     res.status(201).json({ status: 'success', data: newPolicy });
+      }
+      res.status(500).json({ status: 'failed', message:"Failed to create policy"  });
 });
 
 exports.getAllPolicy = catchAsync(async(req, res, next) => {
