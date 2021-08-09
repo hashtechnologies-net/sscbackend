@@ -109,7 +109,7 @@ exports.uploadPolicyPhoto = (req, res, next) => {
 exports.createPolicy = catchAsync(async(req, res, next) => {
     if (!req.files) {
         return new AppError(
-            "Please upload citizenship front and back photo and a nominee's passport size photo",
+            "Please upload citizenship front and back photo",
             400
         );
     }
@@ -182,7 +182,7 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
     
       if (phone) {
         
-         axios.get(`http://api.sparrowsms.com/v2/sms?token=v2_omEJeBXDIfKjKngaclZLxK8igfa.mA85&from=Demo&to=${phone}&text=${MessageText}`).then(res=>{
+         axios.get(`http://api.sparrowsms.com/v2/sms?token=v2_rciwvPq8M6JK5OThNIFRJFEgEvn.AbSX&from=Demo&to=${phone}&text=${MessageText}`).then(res=>{
            if (res.data.response_code==200) {
               console.log("Message sent");
            }

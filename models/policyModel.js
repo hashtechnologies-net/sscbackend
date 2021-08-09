@@ -130,70 +130,70 @@ const policySchema = new mongoose.Schema({
     },
     nominee_name: {
         type: String,
-        required: [true, 'A policy holder must have a nominee name'],
+        // required: [true, 'A policy holder must have a nominee name'],
     },
     nominee_photo: {
         type: String,
-        required: [
-            true,
-            'A policy holder must upload passport size nominee photo',
-        ],
+        // required: [
+        //     true,
+        //     'A policy holder must upload passport size nominee photo',
+        // ],
     },
     nominee_relation: {
         type: String,
-        required: [
-            true,
-            'A policy holder must insert a relation with the nominee',
-        ],
+        // required: [
+        //     true,
+        //     'A policy holder must insert a relation with the nominee',
+        // ],
     },
     nominee_son_wife_daughter_of: {
         type: String,
-        required: [
-            true,
-            "A policy holder must insert a name of the nominee's son/wife/daughter.",
-        ],
+        // required: [
+        //     true,
+        //     "A policy holder must insert a name of the nominee's son/wife/daughter.",
+        // ],
     },
     nominee_dob: {
         type: String,
-        required: [
-            true,
-            "Please check nominee's date of birth and provide in the format YYYY-MM-DD , YYYY/MM/DD....",
-        ],
+        // required: [
+        //     true,
+        //     "Please check nominee's date of birth and provide in the format YYYY-MM-DD , YYYY/MM/DD....",
+        // ],
     },
     nominee_identity_card: {
         type: String,
-        required: [
-            true,
-            "Please check nominee's ID card like citizenship/passport....",
-        ],
+        // required: [
+        //     true,
+        //     "Please check nominee's ID card like citizenship/passport....",
+        // ],
     },
     nominee_card_no: {
         type: String,
-        required: [true, "Please check nominee's ID card number"],
+        // required: [true, "Please check nominee's ID card number"],
     },
     nominee_card_issue_authority: {
         type: String,
-        required: [true, "Please check nominee's ID card's issue authority"],
+        // required: [true, "Please check nominee's ID card's issue authority"],
     },
     nominee_card_date_of_issue: {
         type: String,
-        required: [true, "Please check nominee's ID card's date of issue"],
+        // required: [true, "Please check nominee's ID card's date of issue"],
     },
     nominee_card_place_of_issue: {
         type: String,
-        required: [true, "Please check nominee's ID card's place of issue"],
+        // required: [true, "Please check nominee's ID card's place of issue"],
     },
     nominee_permanent_address: {
         type: String,
-        required: [true, "Please check nominee's permanent address"],
+        // required: [true, "Please check nominee's permanent address"],
     },
     nominee_temporary_address: {
         type: String,
-        required: [true, "Please check nominee's temporary address"],
+        // required: [true, "Please check nominee's temporary address"],
     },
     nominee_phone: {
         type: String,
-        required: [true, "Please check nominee's phone number"],
+        // required: [true, "Please check nominee's phone number"],
     },
     nominee_email: {
         type: String,
