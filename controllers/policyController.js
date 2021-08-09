@@ -189,9 +189,9 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
       }
 
   
-    res.status(201).json({ status: 'success', data: newPolicy });
+    return res.status(201).json({ status: 'success', data: newPolicy });
       }
-      res.status(500).json({ status: 'failed', message:"Failed to create policy"  });
+    return next(new AppError(`Error Creating policy`, 500));
 });
 
 exports.getAllPolicy = catchAsync(async(req, res, next) => {
