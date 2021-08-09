@@ -60,6 +60,7 @@ function checkFileType(file, cb) {
 }
 
 exports.uploadPolicyPhoto = (req, res, next) => {
+    console.log(req.body)
     // if (!req.body.nominee_photo ||
     //     !req.body.citizenship_front ||
     //     !req.body.citizenship_back
