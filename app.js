@@ -13,7 +13,7 @@ const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 
 app.use(compression());
-app.use(express.json({ limit: '20kb' }));
+app.use(express.json());
 // app.use(express.static(path.resolve(__dirname, 'client/build')));
 app.use(express.static(path.join(__dirname, 'public')));
 

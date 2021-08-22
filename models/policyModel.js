@@ -13,6 +13,13 @@ const policySchema = new mongoose.Schema({
         type: String,
         required: [true, 'A policy holder must have a last name'],
     },
+    policy_holder_image:{
+        type: String,
+        required: [
+            true,
+            "A policy holder must enter policy holder's photo",
+        ],
+    },
     phone: {
         type: Number,
         required: [true, 'A policy holder must have a phone number'],
@@ -198,6 +205,16 @@ const policySchema = new mongoose.Schema({
     nominee_email: {
         type: String,
     },
+    refrer:{
+        type: String,
+    },
+    approved_by: {
+		type: mongoose.Schema.ObjectId,
+		ref: 'user',
+	},
+    // created_by:{
+    //     type:String,
+    // },
     slug: { type: String },
 }, { timestamps: true });
 

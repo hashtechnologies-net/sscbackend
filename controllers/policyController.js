@@ -59,15 +59,17 @@ function checkFileType(file, cb) {
     }
 }
 
+// const MLM_URI = (process.env.NODE_ENV=="development")? "http://localhost:5001":"url";
+
 exports.uploadPolicyPhoto = (req, res, next) => {
-    // console.log(req.body)
-    // if (!req.body.nominee_photo ||
+    console.log(req.body,req.files)
+    // if (!req.body.policy_holder_image ||
     //     !req.body.citizenship_front ||
     //     !req.body.citizenship_back
     // ) {
     //     return next(
     //         new AppError(
-    //             `Please provide a nominee photo , citizenship front side and citizenship back side.`,
+    //             `Please provide a policy holder photo , citizenship front side and citizenship back side.`,
     //             400
     //         )
     //     );
@@ -75,7 +77,7 @@ exports.uploadPolicyPhoto = (req, res, next) => {
     const upload = multer({
         storage: storage,
         limits: {
-            fileSize: 1024 * 1024 * 10,
+            fileSize: 1024 * 1024 * 100,
         },
         fileFilter: (req, file, cb) => {
             checkFileType(file, cb);
@@ -92,6 +94,10 @@ exports.uploadPolicyPhoto = (req, res, next) => {
             name: 'nominee_photo',
             maxCount: 1,
         },
+        {
+            name:'policy_holder_image',
+            maxCount:1,
+        }
     ]);
 
     upload(req, res, function(err) {
@@ -133,6 +139,12 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
     )}/img/policies/${req.files.nominee_photo[0].filename}`;
     }
 
+    if (req.files.policy_holder_image) {
+        req.body.policy_holder_image = `${req.protocol}://${req.get(
+      'host'
+    )}/img/policies/${req.files.policy_holder_image[0].filename}`;
+    }
+
     let invalid = true
 
     while (invalid) {
@@ -141,55 +153,13 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
         invalid = (existPolicy.length > 0) ? true : false
       }
     
-      const userName = req.body.first_name+" "+req.body.last_name
-      const {amount, phone, email, card_number} = req.body
     
-      const MessageText = `Dear ${userName}, Thankyou for subscribing SSCard.\n Card Type: ${amount} \n SSC Number: ${card_number}`
       newPolicy = await Policy.create(req.body);
       if(newPolicy){
-      if (email) {
-      
-      let transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        service:"google",
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASSWORD
-        },
-         
-    
-      });
-    
-      transporter.verify(function(error, success) {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log("Server is ready to take our messages");
-          let mailData = {
-            from: "Swasthya Samriddhi Card",
-            to: email,
-            subject: "Swasthya Samriddhi Card",
-            text: MessageText
-          }
-          transporter.sendMail(mailData,(err,success)=>{
-            console.log(err,success)
-          })
-        }
-      });
-    }
-    
-      if (phone) {
-        
-         axios.get(`http://api.sparrowsms.com/v2/sms?token=v2_rciwvPq8M6JK5OThNIFRJFEgEvn.AbSX&from=Demo&to=${phone}&text=${MessageText}`).then(res=>{
-           if (res.data.response_code==200) {
-              console.log("Message sent");
-           }
-         }).catch(error=>console.log(error))
-      }
-
-  
-    return res.status(201).json({ status: 'success', data: newPolicy });
+        axios.post(MLM_URI,newPolicy).then(res=>{
+            console.log(res)
+        })
+        return res.status(201).json({ status: 'success', data: newPolicy });
       }
     return next(new AppError(`Error Creating policy`, 500));
 });
@@ -229,6 +199,52 @@ exports.updatePolicy = catchAsync(async(req, res, next) => {
         runValidators: true,
         new: true,
     });
+
+    if(policy && policy.isPaid===true){
+    const userName = policy.first_name+" "+policy.last_name
+      const {amount, phone, email, card_number} = policy
+      const MessageText = `Dear ${userName}, Thankyou for subscribing SSCard.\nCard Type: ${amount} \nSSC Number: ${card_number}`
+          
+        if (email) {
+           
+            let transporter = nodemailer.createTransport({
+              host: "smtp.gmail.com",
+              port: 587,
+              service:"google",
+              auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASSWORD
+              },
+          
+            });
+          
+            transporter.verify(function(error, success) {
+              if (error) {
+                console.log(error);
+              } else {
+                let mailData = {
+                  from: "Swasthya Samriddhi Card",
+                  to: email,
+                  subject: "Swasthya Samriddhi Card",
+                  text: MessageText
+                }
+                transporter.sendMail(mailData,(err,success)=>{
+                  console.log(err,success)
+                })
+              }
+            });
+          }
+
+            if (phone) {
+               axios.get(`http://api.sparrowsms.com/v2/sms?token=${process.env.SPARROW_TOKEN}&from=SSC_ALERT&to=${phone}&text=${MessageText}`).then(res=>{
+                 if (res.data.response_code==200) {
+                    console.log("Message sent");
+                 }
+               }).catch(error=>console.log(error))
+            }
+      
+        
+    }
 
     if (!policy) {
         return next(new AppError('No policy found with that id', 404));
