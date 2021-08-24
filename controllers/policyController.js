@@ -11,6 +11,7 @@ const { default: axios } = require('axios');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
+       
         if (file.fieldname === 'citizenship_front') {
             cb(null, 'public/img/policies/');
         } else if (file.fieldname === 'citizenship_back') {
@@ -18,13 +19,20 @@ const storage = multer.diskStorage({
         } else if (file.fieldname === 'nominee_photo') {
             cb(null, 'public/img/policies/');
         }
+        else if (file.fieldname === 'policy_holder_image') {
+            cb(null, 'public/img/policies/');
+        }
     },
     filename: (req, file, cb) => {
+      
         if (file.fieldname === 'citizenship_front') {
             cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
         } else if (file.fieldname === 'citizenship_back') {
             cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
         } else if (file.fieldname === 'nominee_photo') {
+            cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
+        }
+        else if (file.fieldname === 'policy_holder_image') {
             cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
         }
     },
@@ -57,12 +65,27 @@ function checkFileType(file, cb) {
             cb(null, false);
         }
     }
+
+    else if (
+        file.fieldname === 'policy_holder_image'
+    ) {
+        if (
+            file.mimetype === 'image/png' ||
+            file.mimetype === 'image/jpg' ||
+            file.mimetype === 'image/jpeg' ||
+            fiel.mimetype === 'image/gif'
+        ) {
+            cb(null, true);
+        } else {
+            cb(null, false);
+        }
+    }
 }
 
-// const MLM_URI = (process.env.NODE_ENV=="development")? "http://localhost:5001":"url";
+const MLM_URI = (process.env.NODE_ENV=="development")? "http://localhost:5001/api/v1/distributor/chain/create-chain":"url";
 
 exports.uploadPolicyPhoto = (req, res, next) => {
-    console.log(req.body,req.files)
+    // console.log(req.body)
     // if (!req.body.policy_holder_image ||
     //     !req.body.citizenship_front ||
     //     !req.body.citizenship_back
@@ -77,7 +100,7 @@ exports.uploadPolicyPhoto = (req, res, next) => {
     const upload = multer({
         storage: storage,
         limits: {
-            fileSize: 1024 * 1024 * 100,
+            fileSize: 2 * 1024 * 1024,
         },
         fileFilter: (req, file, cb) => {
             checkFileType(file, cb);
@@ -101,6 +124,7 @@ exports.uploadPolicyPhoto = (req, res, next) => {
     ]);
 
     upload(req, res, function(err) {
+        
         if (err instanceof multer.MulterError) {
             // A Multer error occurred when uploading.
             return next(new AppError(`Error uploading the files, Multer error`, 400));
@@ -109,9 +133,20 @@ exports.uploadPolicyPhoto = (req, res, next) => {
             return next(new AppError(`Error uploading the files`, 500));
         }
         // Everything went fine.
+       
         next();
     });
 };
+
+const calculateExpiry = date => {
+    const createdDate = new Date(date);
+    const year = createdDate.getFullYear();
+    const month = createdDate.getMonth();
+    const day = createdDate.getDate();
+    const calculatedDate = new Date(year + 1, month, day);
+    return calculatedDate;
+};
+
 
 exports.createPolicy = catchAsync(async(req, res, next) => {
     if (!req.files) {
@@ -120,6 +155,7 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
             400
         );
     }
+    // console.log(req.files)
 
     if (req.files.citizenship_front) {
         req.body.citizenship_front = `${req.protocol}://${req.get(
@@ -146,20 +182,45 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
     }
 
     let invalid = true
-
+   
     while (invalid) {
         req.body.card_number = sscCardNumberGenerator.GenCC().toString();
         const existPolicy =  await Policy.find({card_number: req.body.card_number})
         invalid = (existPolicy.length > 0) ? true : false
       }
-    
-    
+
+    let status = await Policy.find({citizenship_no: req.body.citizenship_no})
+    if(status.length>0){
+    return next(new AppError(`Citizenship Number Already Exist in System`, 500));
+    }
       newPolicy = await Policy.create(req.body);
       if(newPolicy){
-        axios.post(MLM_URI,newPolicy).then(res=>{
-            console.log(res)
-        })
+          let mlmData = {
+              newNode: newPolicy.card_number,
+              first_name: newPolicy.first_name,
+              last_name:newPolicy.last_name,
+              amount:newPolicy.amount,
+              phone: new String(newPolicy.phone),
+              createdAt: newPolicy.createdAt,
+              expiresAt:  new Date(calculateExpiry(newPolicy.createdAt)).toUTCString(),
+          }
+
+          if(newPolicy.reffrer){
+            mlmData.referrer = new String(newPolicy.reffrer)
+          }
+          let stat = false;
+            await axios.post(MLM_URI,mlmData).then(res=>{
+                if (res.status===200) {
+                   stat = true
+                }
+            }).catch((err)=>{
+                console.log(err)
+            })
+            if (stat) {
         return res.status(201).json({ status: 'success', data: newPolicy });
+                
+            }
+       
       }
     return next(new AppError(`Error Creating policy`, 500));
 });
@@ -173,6 +234,8 @@ exports.getAllPolicy = catchAsync(async(req, res, next) => {
     const features = new APIFeatures(Policy.find(), req.query)
         .filter({ first_name: regex, middle_name: regex2, last_name: regex3 })
         .sort()
+        .populate('approved_by')
+        .populate('created_by')
         .limitFields()
         .paginate();
     const policy = await features.query;
@@ -195,6 +258,12 @@ exports.getPolicy = catchAsync(async(req, res, next) => {
 });
 
 exports.updatePolicy = catchAsync(async(req, res, next) => {
+    // console.log(req.body)
+    if (req.files && req.files.policy_holder_image) {
+        req.body.policy_holder_image = `${req.protocol}://${req.get(
+      'host'
+    )}/img/policies/${req.files.policy_holder_image[0].filename}`;
+    }
     const policy = await Policy.findByIdAndUpdate(req.params.id, req.body, {
         runValidators: true,
         new: true,
@@ -203,7 +272,8 @@ exports.updatePolicy = catchAsync(async(req, res, next) => {
     if(policy && policy.isPaid===true){
     const userName = policy.first_name+" "+policy.last_name
       const {amount, phone, email, card_number} = policy
-      const MessageText = `Dear ${userName}, Thankyou for subscribing SSCard.\nCard Type: ${amount} \nSSC Number: ${card_number}`
+      const expiresAt=  new Date(calculateExpiry(policy.createdAt)).toLocaleDateString()
+      const MessageText = `Dear ${userName}, Thankyou for subscribing Swasthya Samriddhi Card.\nCard Type: ${amount} \nSSC Number: ${card_number} \n Expires on:${expiresAt}`
           
         if (email) {
            
@@ -229,14 +299,15 @@ exports.updatePolicy = catchAsync(async(req, res, next) => {
                   text: MessageText
                 }
                 transporter.sendMail(mailData,(err,success)=>{
-                  console.log(err,success)
+                //   console.log(err,success)
                 })
               }
             });
           }
 
             if (phone) {
-               axios.get(`http://api.sparrowsms.com/v2/sms?token=${process.env.SPARROW_TOKEN}&from=SSC_ALERT&to=${phone}&text=${MessageText}`).then(res=>{
+                // console.log(process.env.SPARROW_TOKEN);
+               axios.get(`http://api.sparrowsms.com/v2/sms?token=v2_M6tCoU3737I2IblUhfmxSdNxrva.TelS&from=InfoSMS&to=${phone}&text=${MessageText}`).then(res=>{
                  if (res.data.response_code==200) {
                     console.log("Message sent");
                  }

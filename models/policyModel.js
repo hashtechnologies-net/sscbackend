@@ -27,6 +27,7 @@ const policySchema = new mongoose.Schema({
     citizenship_no: {
         type: String,
         required: [true, 'A policy holder must have a citizenship'],
+        unique:true,
     },
     email: {
         type: String,
@@ -112,7 +113,7 @@ const policySchema = new mongoose.Schema({
     },
     grand_mother_name: {
         type: String,
-        required: [true, "A policy holder must enter their grand mother's name "],
+        // required: [true, "A policy holder must enter their grand mother's name "],
     },
     husband_wife_name: {
         type: String,
@@ -205,12 +206,19 @@ const policySchema = new mongoose.Schema({
     nominee_email: {
         type: String,
     },
-    refrer:{
+    reffrer:{
+        type: String,
+    },
+    receipt_no:{
         type: String,
     },
     approved_by: {
 		type: mongoose.Schema.ObjectId,
-		ref: 'user',
+		ref: 'User',
+	},
+    created_by: {
+		type: mongoose.Schema.ObjectId,
+		ref: 'User',
 	},
     // created_by:{
     //     type:String,
