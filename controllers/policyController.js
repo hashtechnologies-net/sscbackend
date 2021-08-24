@@ -82,7 +82,7 @@ function checkFileType(file, cb) {
     }
 }
 
-const MLM_URI = (process.env.NODE_ENV=="development")? "http://localhost:5001/api/v1/distributor/chain/create-chain":"url";
+const MLM_URI = (process.env.NODE_ENV=="development")? "http://localhost:5001/api/v1/distributor/chain/create-chain":"https://ssc-mlm.herokuapp.com";
 
 exports.uploadPolicyPhoto = (req, res, next) => {
     // console.log(req.body)
@@ -146,7 +146,7 @@ const calculateExpiry = date => {
     const calculatedDate = new Date(year + 1, month, day);
     return calculatedDate;
 };
-
+//Integrated@256890
 
 exports.createPolicy = catchAsync(async(req, res, next) => {
     if (!req.files) {
