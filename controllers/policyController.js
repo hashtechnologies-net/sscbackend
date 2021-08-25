@@ -82,7 +82,7 @@ function checkFileType(file, cb) {
     }
 }
 
-const MLM_URI = "https://ssc-mlm.herokuapp.com/api/v1/create-chain";
+const MLM_URI = "https://ssc-mlm.herokuapp.com/api/v1/distributor/chain/create-chain";
 
 exports.uploadPolicyPhoto = (req, res, next) => {
     // console.log(req.body)
