@@ -82,7 +82,7 @@ function checkFileType(file, cb) {
     }
 }
 
-const MLM_URI = (process.env.NODE_ENV=="development")? "http://localhost:5001/api/v1/distributor/chain/create-chain":"https://ssc-mlm.herokuapp.com";
+const MLM_URI = "https://ssc-mlm.herokuapp.com/api/v1/create-chain";
 
 exports.uploadPolicyPhoto = (req, res, next) => {
     // console.log(req.body)
@@ -193,7 +193,7 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
     if(status.length>0){
     return next(new AppError(`Citizenship Number Already Exist in System`, 500));
     }
-      newPolicy = await Policy.create(req.body);
+      const newPolicy = await Policy.create(req.body);
       if(newPolicy){
           let mlmData = {
               newNode: newPolicy.card_number,
