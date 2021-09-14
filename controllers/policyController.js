@@ -307,7 +307,7 @@ exports.updatePolicy = catchAsync(async(req, res, next) => {
 
             if (phone) {
                 // console.log(process.env.SPARROW_TOKEN);
-               axios.get(`http://api.sparrowsms.com/v2/sms?token=v2_M6tCoU3737I2IblUhfmxSdNxrva.TelS&from=InfoSMS&to=${phone}&text=${MessageText}`).then(res=>{
+               axios.get(`http://api.sparrowsms.com/v2/sms?token=v2_M6tCoU3737I2IblUhfmxSdNxrva.TelS&from=SSCALERT&to=${phone}&text=${MessageText}`).then(res=>{
                  if (res.data.response_code==200) {
                     console.log("Message sent");
                  }
