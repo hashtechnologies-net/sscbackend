@@ -35,6 +35,7 @@ exports.resizePharmacyPhoto = catchAsync(async (req, res, next) => {
     .jpeg({ quality: 90 })
     .toFile(`public/img/pharmacies/${req.file.filename}`);
 
+    console.log(req.protocol);
   req.body.photo = `${req.protocol}://${req.get('host')}/img/pharmacies/${
     req.file.filename
   }`;

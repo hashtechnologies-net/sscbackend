@@ -62,8 +62,11 @@ app.use('/api/v1/policy', policyRouter);
 app.use('/api/v1/users', userRouter);
 
 app.all('*', (req, res, next) => {
+    
     next(new AppError(`Cant find ${req.originalUrl} on this server`, 404));
 });
+
+
 
 app.use(globalErrorHandler);
 
