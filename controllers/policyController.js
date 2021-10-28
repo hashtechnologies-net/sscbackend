@@ -195,27 +195,27 @@ exports.createPolicy = catchAsync(async(req, res, next) => {
     }
       const newPolicy = await Policy.create(req.body);
       if(newPolicy){
-          let mlmData = {
-              newNode: newPolicy.card_number,
-              first_name: newPolicy.first_name,
-              last_name:newPolicy.last_name,
-              amount:newPolicy.amount,
-              phone: new String(newPolicy.phone),
-              createdAt: newPolicy.createdAt,
-              expiresAt:  new Date(calculateExpiry(newPolicy.createdAt)).toUTCString(),
-          }
+        //   let mlmData = {
+        //       newNode: newPolicy.card_number,
+        //       first_name: newPolicy.first_name,
+        //       last_name:newPolicy.last_name,
+        //       amount:newPolicy.amount,
+        //       phone: new String(newPolicy.phone),
+        //       createdAt: newPolicy.createdAt,
+        //       expiresAt:  new Date(calculateExpiry(newPolicy.createdAt)).toUTCString(),
+        //   }
 
-          if(newPolicy.reffrer){
-            mlmData.referrer = new String(newPolicy.reffrer)
-          }
-          let stat = false;
-            await axios.post(MLM_URI,mlmData).then(res=>{
-                if (res.status===200) {
-                   stat = true
-                }
-            }).catch((err)=>{
-                console.log(err)
-            })
+        //   if(newPolicy.reffrer){
+        //     mlmData.referrer = new String(newPolicy.reffrer)
+        //   }
+          let stat = true;
+            // await axios.post(MLM_URI,mlmData).then(res=>{
+            //     if (res.status===200) {
+            //        stat = true
+            //     }
+            // }).catch((err)=>{
+            //     console.log(err)
+            // })
             if (stat) {
         return res.status(201).json({ status: 'success', data: newPolicy });
                 
