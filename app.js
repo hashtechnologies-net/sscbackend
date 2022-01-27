@@ -1,5 +1,4 @@
 const express = require('express');
-const morgan = require('morgan');
 const path = require('path');
 const compression = require('compression');
 const globalErrorHandler = require('./controllers/errorController');
@@ -24,6 +23,7 @@ app.use(express.json({ limit: '10kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 if (process.env.NODE_ENV == 'development') {
+  const morgan = require('morgan');
   app.use(morgan('dev'));
 }
 
