@@ -41,3 +41,10 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
+
+// -----------------------------------------------------------------------
+
+const axios = require('axios');
+setInterval(() => {
+  axios.get('http://localhost:5000/');
+}, 1500000);
