@@ -132,17 +132,16 @@ exports.signup = catchAsync(async (req, res, next) => {
     });
   }
 
-  const phoneNumber = "+977"+req.body.phone;
+  const phoneNumber = '+977' + req.body.phone;
 
-  const token = await Token.findOne({phone: phoneNumber});
-  if(!token){
+  const token = await Token.findOne({ phone: phoneNumber });
+  if (!token) {
     return res.status(500).json({
-      "message":"User not verified",
+      message: 'User not verified',
     });
   }
 
-
-  let user = new User({phone: phone, password: password});
+  let user = new User({ phone: phone, password: password });
 
   user = await user.save();
   createSendToken(user, 200, req, res);
@@ -171,41 +170,35 @@ exports.sendOTP = catchAsync(async (req, res, next) => {
   if (error) {
     return next(new AppError(`${error.details[0].message}`, 403));
   }
- 
-  if(phone){
 
-  phone = "+977"+phone;  
-  var params = {
-    originator: 'SSC_ALERT'
+  if (phone) {
+    phone = '+977' + phone;
+    var params = {
+      originator: 'SSC_ALERT',
     };
     messagebird.verify.create(phone, params, async function (err, response) {
-    if (err) {
-      // console.log(err);
-        if(err.statusCode===422){
-
+      if (err) {
+        // console.log(err);
+        if (err.statusCode === 422) {
           return res.status(422).json({
             status: 'fail',
             message: 'Failed to send OTP',
           });
         }
       }
-        if(response.status=='sent'){
-          let token = new Token({phone: phone, token: response.id});
-          token = await token.save();
-            return res.status(201).json({
-              "id":response.id,
-              "message":"OTP Sent",
-            })
-
-        }
-        return res.status(500).json({
-         
-          "message":"Internal server error",
-
+      if (response.status == 'sent') {
+        let token = new Token({ phone: phone, token: response.id });
+        token = await token.save();
+        return res.status(201).json({
+          id: response.id,
+          message: 'OTP Sent',
         });
+      }
+      return res.status(500).json({
+        message: 'Internal server error',
       });
-    }
-  
+    });
+  }
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -446,48 +439,46 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     return next(new AppError('There is no user with phone number.', 500));
   }
 
-  const token = await Token.findOne({phone: req.body.phone});
+  const token = await Token.findOne({ phone: req.body.phone });
   if (token) {
     return next(new AppError('Wait for 2 minutes', 500));
   }
 
   // 2) Send OTP
   try {
-    
     // console.log(req.body)
-    let { phone } = req.body
-    const phoneForToken = phone
-    if(phone){
-      phone = "+977"+phone;  
+    let { phone } = req.body;
+    const phoneForToken = phone;
+    if (phone) {
+      phone = '+977' + phone;
 
       var params = {
-        originator: 'SSC_ALERT'
-        };
-        messagebird.verify.create(phone, params, async function (err, response) {
+        originator: 'SSC_ALERT',
+      };
+      messagebird.verify.create(phone, params, async function (err, response) {
         if (err) {
           // console.log(err);
-            if(err.statusCode===422){
-              return res.status(422).json({
-                status: 'fail',
-                message: 'Failed to send OTP',
-              });
-            }
-          }
-            if(response.status=='sent'){
-              let token = new Token({phone: phoneForToken, token: response.id});
-              token = await token.save();
-    
-                return res.status(201).json({
-                  "id":response.id,
-                  "message":"OTP Sent",
-                });
-            }
-            return res.status(500).json({
-              "message":"Internal server error",
+          if (err.statusCode === 422) {
+            return res.status(422).json({
+              status: 'fail',
+              message: 'Failed to send OTP',
             });
+          }
+        }
+        if (response.status == 'sent') {
+          let token = new Token({ phone: phoneForToken, token: response.id });
+          token = await token.save();
+
+          return res.status(201).json({
+            id: response.id,
+            message: 'OTP Sent',
+          });
+        }
+        return res.status(500).json({
+          message: 'Internal server error',
         });
-    
-      }
+      });
+    }
   } catch (err) {
     // user.passwordResetToken = undefined;
     // user.passwordResetExpires = undefined;
@@ -529,27 +520,26 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
 exports.setPassword = catchAsync(async (req, res, next) => {
   // 1) Get user from collection
-  const token = await Token.findOne({token: req.body.token});
-  if(!token){
+  const token = await Token.findOne({ token: req.body.token });
+  if (!token) {
     return res.status(500).json({
-      "message":"User not verified",
+      message: 'User not verified',
     });
-  }else{
-  
-  const user = await User.findOne({phone: token.phone});
+  } else {
+    const user = await User.findOne({ phone: token.phone });
 
-  // 3) If so, update password
-  user.password = req.body.password;
-  user.passwordConfirm = req.body.passwordConfirm;
-  user.isVerified = true;
-  await user.save();
+    // 3) If so, update password
+    user.password = req.body.password;
+    user.passwordConfirm = req.body.passwordConfirm;
+    user.isVerified = true;
+    await user.save();
 
-  return res.status(200).json({
-    "message":"Password Saved",
-  });
-  // User.findByIdAndUpdate will NOT work as intended!
-  // 4) Log user in, send JWT
-  // createSendToken(user, 200, req, res);
+    return res.status(200).json({
+      message: 'Password Saved',
+    });
+    // User.findByIdAndUpdate will NOT work as intended!
+    // 4) Log user in, send JWT
+    // createSendToken(user, 200, req, res);
   }
 });
 
@@ -681,10 +671,9 @@ exports.verifOTP = function (req, res, next) {
       return res.status(201).json({
         message: 'OTP Verified',
       });
-  }
-  return res.status(201).json({
-    response
-  });
-
+    }
+    return res.status(201).json({
+      response,
+    });
   });
 };
