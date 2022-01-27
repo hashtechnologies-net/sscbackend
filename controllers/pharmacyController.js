@@ -66,7 +66,11 @@ exports.getAllPharmacy = catchAsync(async (req, res, next) => {
     .limitFields()
     .paginate();
   const pharmacy = await features.query;
-  const pharmacyCount = await Pharmacy.countDocuments();
+
+  const options = {};
+  if (req.query.hasOwnProperty('isVisible'))
+    options.isVisible = req.query.isVisible;
+  const pharmacyCount = await Pharmacy.countDocuments(options);
 
   return res.status(200).json({
     status: 'success',
