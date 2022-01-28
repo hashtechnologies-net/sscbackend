@@ -6,6 +6,8 @@ const {
   getProduct,
   updateProduct,
   deleteProduct,
+  readImage,
+  resizeImage,
 } = require('../controllers/productsController');
 
 router.route('/').get(getAllProducts);
@@ -15,7 +17,10 @@ router.route('/:productId').get(getProduct);
 router.use(authController.protect);
 router.use(authController.restrictTo('admin'));
 
-router.route('/').post(createProduct);
-router.route('/:productId').patch(updateProduct).delete(deleteProduct);
+router.route('/').post(readImage, resizeImage, createProduct);
+router
+  .route('/:productId')
+  .patch(readImage, resizeImage, updateProduct)
+  .delete(deleteProduct);
 
 module.exports = router;

@@ -1,6 +1,44 @@
+const multer = require('multer');
+const sharp = require('sharp');
 const Products = require('../models/productsModel');
 const Category = require('../models/categoryModel');
 const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image! Please upload only images.', 400), false);
+  }
+};
+
+const upload = multer({
+  fileFilter: multerFilter,
+});
+
+exports.readImage = upload.array('imageUrl');
+
+exports.resizeImage = catchAsync(async (req, res, next) => {
+  if (!req.files || req.files.length == 0) return next();
+
+  req.body.imageUrl = [];
+  await Promise.all(
+    req.files.map(async (file) => {
+      const filename = `${file.fieldname}-${Date.now()}-${file.originalname}`;
+      await sharp(file.buffer)
+        .resize(800, 450)
+        .jpeg({ quality: 90 })
+        .toFile(`public/img/products/${filename}`);
+
+      req.body.imageUrl.push(
+        `${req.protocol}://${req.get('host')}/img/products/${filename}`
+      );
+    })
+  );
+
+  next();
+});
 
 exports.createProduct = catchAsync(async (req, res, next) => {
   const promises = [
