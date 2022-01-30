@@ -66,7 +66,9 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
     .skip(skip)
     .sort(sort);
 
-  res.status(200).json(products);
+  const totalProducts = await Products.estimatedDocumentCount();
+
+  res.status(200).json({ totalProducts, products });
 });
 
 exports.getProduct = catchAsync(async (req, res, next) => {
