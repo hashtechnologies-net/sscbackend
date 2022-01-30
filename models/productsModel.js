@@ -11,6 +11,7 @@ const productSchema = mongoose.Schema(
       type: String,
       required: [true, 'productCode is required'],
       trim: true,
+      unique: [true, 'productCode should be unique'],
     },
     category: {
       type: String,
