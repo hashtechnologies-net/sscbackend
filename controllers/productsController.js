@@ -53,10 +53,19 @@ exports.createProduct = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllProducts = catchAsync(async (req, res, next) => {
+  let { sort, page, limit } = req.query;
+  page = page && +page >= 1 ? +page : 1;
+  limit = limit && +limit >= 10 ? +limit : 10;
+  const skip = limit * (page - 1);
+
   delete req.query.page;
   delete req.query.limit;
 
-  const products = await Products.find(req.query);
+  const products = await Products.find(req.query)
+    .limit(limit)
+    .skip(skip)
+    .sort(sort);
+
   res.status(200).json(products);
 });
 
