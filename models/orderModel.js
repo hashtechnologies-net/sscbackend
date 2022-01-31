@@ -16,6 +16,11 @@ const OrderSchema = new mongoose.Schema(
       default: 'Processing',
     },
 
+    shippingAddress: {
+      type: String,
+      required: [true, 'shippingAddress is required'],
+    },
+
     paymentType: {
       type: String,
       enum: ['COD', 'Esewa', 'Khalti'],

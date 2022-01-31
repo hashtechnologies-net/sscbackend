@@ -74,6 +74,7 @@ const userSchema = new mongoose.Schema(
       default: true,
       select: false,
     },
+    address: String,
     cart: [
       {
         productId: { type: mongoose.Schema.Types.ObjectId, ref: 'products' },
