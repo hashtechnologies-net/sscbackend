@@ -16,6 +16,7 @@ router.use(authController.protect);
 router.use(authController.restrictTo('admin'));
 
 router.route('/').post(createCategory);
-router.route('/:categoryName').patch(updateCategory).delete(deleteCategory);
+router.route('/:categoryName').patch(updateCategory);
+router.route('/:categoryId').delete(deleteCategory);
 
 module.exports = router;

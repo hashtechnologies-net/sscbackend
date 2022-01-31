@@ -73,7 +73,6 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
 
 exports.getProduct = catchAsync(async (req, res, next) => {
   const product = await Products.findById(req.params.productId);
-  console.log(product);
   res.status(200).json(product);
 });
 

@@ -16,7 +16,6 @@ exports.getAllCategory = catchAsync(async (req, res, next) => {
 
 exports.getCategory = catchAsync(async (req, res, next) => {
   const category = await Category.findOne(req.params.categoryName);
-  console.log(category);
   res.status(200).json(category);
 });
 
@@ -39,14 +38,11 @@ exports.updateCategory = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteCategory = catchAsync(async (req, res, next) => {
-  const promises = [
-    Category.findOneAndDelete(req.params.categoryName),
-    Products.updateMany(
-      { category: req.params.categoryName },
-      { category: null }
-    ),
-  ];
+  const category = await Category.findByIdAndDelete(req.params.categoryId);
+  const products = await Products.updateMany(
+    { category: category.categoryName },
+    { category: '' }
+  );
 
-  await Promise.all(promises);
   res.status(204).json();
 });
