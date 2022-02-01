@@ -7,6 +7,7 @@ const {
   getOrders,
   updateOrder,
   deleteOrder,
+  getOrder,
 } = require('../controllers/ordersController');
 
 // protected routes
@@ -33,6 +34,10 @@ router
  */
 router.use(authController.restrictTo('admin'));
 router.route('/admin').get(getOrders);
-router.route('/admin/:orderId').patch(updateOrder).delete(deleteOrder);
+router
+  .route('/admin/:orderId')
+  .get(getOrder)
+  .patch(updateOrder)
+  .delete(deleteOrder);
 
 module.exports = router;
