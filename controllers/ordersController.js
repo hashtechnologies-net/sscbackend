@@ -44,7 +44,9 @@ exports.getMyOrders = catchAsync(async (req, res, next) => {
     .limit(limit)
     .skip(skip);
 
-  res.status(200).json(orders);
+  const totalOrders = await Orders.estimatedDocumentCount();
+
+  res.status(200).json({ totalOrders, orders });
 });
 
 exports.cancelUserOrder = catchAsync(async (req, res, next) => {
@@ -87,7 +89,14 @@ exports.getOrders = catchAsync(async (req, res, next) => {
     .skip(skip)
     .sort(sort);
 
-  res.status(200).json(orders);
+  const totalOrders = await Orders.estimatedDocumentCount();
+
+  res.status(200).json({ totalOrders, orders });
+});
+
+exports.getOrder = catchAsync(async (req, res, next) => {
+  const order = await Orders.findById(req.params.orderId);
+  res.status(200).json(order);
 });
 
 exports.updateOrder = catchAsync(async (req, res, next) => {
