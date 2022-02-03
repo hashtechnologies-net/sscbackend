@@ -61,14 +61,17 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
   delete req.query.page;
   delete req.query.limit;
 
-  const products = await Products.find(req.query)
-    .limit(limit)
-    .skip(skip)
-    .sort(sort);
+  const filter = {};
+  if (req.query.category) filter.category = req.query.category;
 
-  const totalProducts = await Products.estimatedDocumentCount();
+  const promises = [
+    Products.find(req.query).limit(limit).skip(skip).sort(sort),
+    Products.countDocuments(filter),
+  ];
 
-  res.status(200).json({ totalProducts, products });
+  const result = await Promise.all(promises);
+
+  res.status(200).json({ totalProducts: result[1], products: result[0] });
 });
 
 exports.getProduct = catchAsync(async (req, res, next) => {
