@@ -39,14 +39,25 @@ exports.getMyOrders = catchAsync(async (req, res, next) => {
   limit = limit && +limit >= 10 ? +limit : 10;
   const skip = limit * (page - 1);
 
-  const orders = await Orders.find({ userId: req.user._id })
-    .sort(sort)
-    .limit(limit)
-    .skip(skip);
+  const promises = [
+    Orders.estimatedDocumentCount(),
+    Orders.countDocuments({ status: 'Processing' }),
+    Orders.countDocuments({ status: 'Delivered' }),
+    Orders.countDocuments({ status: 'Received' }),
+    Orders.countDocuments({ status: 'Cancelled' }),
+    Orders.find({ userId: req.user._id }).sort(sort).limit(limit).skip(skip),
+  ];
 
-  const totalOrders = await Orders.estimatedDocumentCount();
+  const result = await Promise.all(promises);
 
-  res.status(200).json({ totalOrders, orders });
+  res.status(200).json({
+    totalOrders: result[0],
+    processing: result[1],
+    delivered: result[2],
+    received: result[3],
+    cancelled: result[4],
+    orders: result[5],
+  });
 });
 
 exports.cancelUserOrder = catchAsync(async (req, res, next) => {
@@ -95,16 +106,14 @@ exports.getOrders = catchAsync(async (req, res, next) => {
 
   const result = await Promise.all(promises);
 
-  res
-    .status(200)
-    .json({
-      totalOrders: result[0],
-      processing: result[1],
-      delivered: result[2],
-      received: result[3],
-      cancelled: result[4],
-      orders: result[5],
-    });
+  res.status(200).json({
+    totalOrders: result[0],
+    processing: result[1],
+    delivered: result[2],
+    received: result[3],
+    cancelled: result[4],
+    orders: result[5],
+  });
 });
 
 exports.getOrder = catchAsync(async (req, res, next) => {
