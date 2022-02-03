@@ -84,14 +84,27 @@ exports.getOrders = catchAsync(async (req, res, next) => {
   delete req.query.page;
   delete req.query.limit;
 
-  const orders = await Orders.find(req.query)
-    .limit(limit)
-    .skip(skip)
-    .sort(sort);
+  const promises = [
+    Orders.estimatedDocumentCount(),
+    Orders.countDocuments({ status: 'Processing' }),
+    Orders.countDocuments({ status: 'Delivered' }),
+    Orders.countDocuments({ status: 'Received' }),
+    Orders.countDocuments({ status: 'Cancelled' }),
+    Orders.find(req.query).limit(limit).skip(skip).sort(sort),
+  ];
 
-  const totalOrders = await Orders.estimatedDocumentCount();
+  const result = await Promise.all(promises);
 
-  res.status(200).json({ totalOrders, orders });
+  res
+    .status(200)
+    .json({
+      totalOrders: result[0],
+      processing: result[1],
+      delivered: result[2],
+      received: result[3],
+      cancelled: result[4],
+      orders: result[5],
+    });
 });
 
 exports.getOrder = catchAsync(async (req, res, next) => {
