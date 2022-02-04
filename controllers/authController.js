@@ -134,12 +134,14 @@ exports.signup = catchAsync(async (req, res, next) => {
 
   const phoneNumber = '+977' + req.body.phone;
 
+  // comment this block of code to signup new user in development
   const token = await Token.findOne({ phone: phoneNumber });
   if (!token) {
     return res.status(500).json({
       message: 'User not verified',
     });
   }
+  // above this line
 
   let user = new User({ phone: phone, password: password });
 
