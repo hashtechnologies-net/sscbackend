@@ -21,7 +21,6 @@ app.use(compression());
 app.use(express.json({ limit: '10kb' }));
 // app.use(express.static(path.resolve(__dirname, 'client/build')));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'ecom')));
 
 if (process.env.NODE_ENV == 'development') {
   const morgan = require('morgan');

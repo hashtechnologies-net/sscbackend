@@ -29,7 +29,7 @@ exports.resizeImage = catchAsync(async (req, res, next) => {
       await sharp(file.buffer)
         .resize(800, 450)
         .jpeg({ quality: 90 })
-        .toFile(`ecom/products/${filename}`);
+        .toFile(`public/img/products/${filename}`);
 
       req.body.imageUrl.push(
         `${req.protocol}://${req.get('host')}/products/${filename}`
