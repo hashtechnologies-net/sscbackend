@@ -8,7 +8,14 @@ const {
   updateOrder,
   deleteOrder,
   getOrder,
+  checkPayment,
 } = require('../controllers/ordersController');
+
+/**
+ * @access ALL
+ * @description Check if payment is fulfilled or failed
+ */
+router.route('/checkPayment').get(checkPayment);
 
 // protected routes
 router.use(authController.protect);

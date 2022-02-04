@@ -3,6 +3,7 @@ const AppError = require('../utils/appError');
 const Orders = require('../models/orderModel');
 const Users = require('../models/userModel');
 const Products = require('../models/productsModel');
+const axios = require('axios');
 
 exports.createOrder = catchAsync(async (req, res, next) => {
   req.body.userId = req.user._id;
@@ -142,4 +143,15 @@ exports.updateOrder = catchAsync(async (req, res, next) => {
 exports.deleteOrder = catchAsync(async (req, res, next) => {
   await Orders.findByIdAndDelete(req.params.orderId);
   res.status(204).json();
+});
+
+exports.checkPayment = catchAsync(async (req, res, next) => {
+  const response = await axios.get(
+    `https://esewa.com.np/epay/transrec?amt=${req.query.amt}&pid=${req.query.pid}&rid=${req.query.rid}&scd=${req.query.scd}`
+  );
+
+  if (response.data?.includes('Success')) {
+    return res.status(200).json({ success: true });
+  }
+  res.status(200).json({ success: false });
 });
