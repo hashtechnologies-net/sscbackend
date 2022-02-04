@@ -21,6 +21,16 @@ const OrderSchema = new mongoose.Schema(
       required: [true, 'shippingAddress is required'],
     },
 
+    deliveryDate: {
+      type: Date,
+      required: [true, 'deliveryDate is required'],
+    },
+
+    shippingCharge: {
+      type: Number,
+      required: [true, 'shippingCharge is required'],
+    },
+
     paymentType: {
       type: String,
       enum: ['COD', 'Esewa', 'Khalti'],
