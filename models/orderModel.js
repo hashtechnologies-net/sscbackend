@@ -27,6 +27,11 @@ const OrderSchema = new mongoose.Schema(
       required: true,
     },
 
+    paymentFulfilled: {
+      type: Boolean,
+      default: false,
+    },
+
     esewaCredentials: {},
     khaltiCredentials: {},
   },

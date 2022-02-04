@@ -9,19 +9,44 @@ exports.createOrder = catchAsync(async (req, res, next) => {
   req.body.userId = req.user._id;
   req.body.products = req.user.cart;
 
+  // check if cart is empty
   if (!req.body.products.length)
     return next(new AppError("Can't create order. Cart is empty.", 400));
 
-  const getProducts = await Promise.all(
-    req.body.products.map(({ productId }) => Products.findById(productId))
+  // check if payment is fullfilled and get products data
+  const checkPaymentAndProducts = [];
+  if (req.body.paymentType !== 'COD') {
+    const type =
+      req.body.paymentType === 'Esewa'
+        ? 'esewaCredentials'
+        : 'khaltiCredentials';
+    checkPaymentAndProducts.push(
+      axios.get(
+        `https://esewa.com.np/epay/transrec?amt=${req.body[type].amt}&pid=${req.body[type].oid}&rid=${req.body[type].refId}&scd=${req.body[type].scd}`
+      )
+    );
+  }
+
+  req.body.products.map(({ productId }) =>
+    checkPaymentAndProducts.push(Products.findById(productId))
   );
 
+  const response = await Promise.all(checkPaymentAndProducts);
+
+  req.body.paymentFulfilled = response[0].data?.includes('Success');
+
+  // remove first response object from checkPaymentAndProducts
+  req.body.paymentType !== 'COD' && response.shift();
+
   // merge price of products in products of order
-  req.body.products = req.body.products.map((product, index) => ({
-    ...product.toObject(),
-    price: getProducts[index].price,
-    _id: undefined,
-  }));
+  req.body.products = req.body.products.map((product, index) => {
+    return {
+      ...product.toObject(),
+      ...response[index].toObject(),
+      description: undefined,
+      _id: undefined,
+    };
+  });
 
   // create order
   // empty user's cart
