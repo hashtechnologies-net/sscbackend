@@ -11,6 +11,17 @@ exports.createOrder = catchAsync(async (req, res, next) => {
   if (!req.body.products.length)
     return next(new AppError("Can't create order. Cart is empty.", 400));
 
+  const getProducts = await Promise.all(
+    req.body.products.map(({ productId }) => Products.findById(productId))
+  );
+
+  // merge price of products in products of order
+  req.body.products = req.body.products.map((product, index) => ({
+    ...product.toObject(),
+    price: getProducts[index].price,
+    _id: undefined,
+  }));
+
   // create order
   // empty user's cart
   // decrease stock of all the products

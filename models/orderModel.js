@@ -26,6 +26,9 @@ const OrderSchema = new mongoose.Schema(
       enum: ['COD', 'Esewa', 'Khalti'],
       required: true,
     },
+
+    esewaCredentials: {},
+    khaltiCredentials: {},
   },
   { timestamps: true }
 );
