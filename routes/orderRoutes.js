@@ -9,6 +9,7 @@ const {
   deleteOrder,
   getOrder,
   checkPayment,
+  getSingleOrder,
 } = require('../controllers/ordersController');
 
 /**
@@ -31,6 +32,7 @@ router
 
 router
   .route('/user/:orderId')
+  .get(authController.restrictTo('user'), getSingleOrder)
   .patch(authController.restrictTo('user'), cancelUserOrder);
 
 // -------------------------------------------------------------

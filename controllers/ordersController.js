@@ -70,6 +70,11 @@ exports.createOrder = catchAsync(async (req, res, next) => {
   res.status(200).json(order[0]);
 });
 
+exports.getSingleOrder = catchAsync(async (req, res, next) => {
+  const order = await Orders.findById(req.params.orderId);
+  res.status(200).json(order);
+});
+
 exports.getMyOrders = catchAsync(async (req, res, next) => {
   let { sort, page, limit } = req.query;
   page = page && +page >= 1 ? +page : 1;
