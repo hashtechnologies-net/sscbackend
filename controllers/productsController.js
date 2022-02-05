@@ -60,6 +60,7 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
 
   delete req.query.page;
   delete req.query.limit;
+  delete req.query.sort;
 
   const filter = {};
   if (req.query.category) filter.category = req.query.category;

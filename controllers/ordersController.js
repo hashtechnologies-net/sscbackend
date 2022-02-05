@@ -81,13 +81,20 @@ exports.getMyOrders = catchAsync(async (req, res, next) => {
   limit = limit && +limit >= 10 ? +limit : 10;
   const skip = limit * (page - 1);
 
+  delete req.query.page;
+  delete req.query.sort;
+  delete req.query.limit;
+
   const promises = [
     Orders.estimatedDocumentCount(),
     Orders.countDocuments({ status: 'Processing' }),
     Orders.countDocuments({ status: 'Delivered' }),
     Orders.countDocuments({ status: 'Received' }),
     Orders.countDocuments({ status: 'Cancelled' }),
-    Orders.find({ userId: req.user._id }).sort(sort).limit(limit).skip(skip),
+    Orders.find({ userId: req.user._id, ...req.query })
+      .sort(sort)
+      .limit(limit)
+      .skip(skip),
   ];
 
   const result = await Promise.all(promises);
@@ -136,6 +143,7 @@ exports.getOrders = catchAsync(async (req, res, next) => {
 
   delete req.query.page;
   delete req.query.limit;
+  delete req.query.sort;
 
   const promises = [
     Orders.estimatedDocumentCount(),
