@@ -48,6 +48,10 @@ exports.createOrder = catchAsync(async (req, res, next) => {
     };
   });
 
+  // hard coded for a while
+  req.body.shippingCharge = 234;
+  req.body.deliveryDate = Date.now();
+
   // create order
   // empty user's cart
   // decrease stock of all the products
@@ -65,10 +69,6 @@ exports.createOrder = catchAsync(async (req, res, next) => {
       )
     );
   });
-
-  // hard coded for a while
-  req.body.shippingCharge = 234;
-  req.body.deliveryDate = Date.now();
 
   const order = await Promise.all(promises);
   res.status(200).json(order[0]);
