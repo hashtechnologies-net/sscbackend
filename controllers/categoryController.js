@@ -41,7 +41,7 @@ exports.deleteCategory = catchAsync(async (req, res, next) => {
   const category = await Category.findByIdAndDelete(req.params.categoryId);
   const products = await Products.updateMany(
     { category: category.categoryName },
-    { category: '' }
+    { category: 'null' }
   );
 
   res.status(204).json();
