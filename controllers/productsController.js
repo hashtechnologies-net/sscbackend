@@ -58,16 +58,24 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
   limit = limit && +limit >= 10 ? +limit : 10;
   const skip = limit * (page - 1);
 
+  if (req.query.search?.trim())
+    req.query.$text = { $search: req.query.search || ' ' };
+
+  // reserved properties for query
   delete req.query.page;
   delete req.query.limit;
   delete req.query.sort;
+  delete req.query.search;
 
-  const filter = {};
-  if (req.query.category) filter.category = req.query.category;
-
+  // if search query exists, search by product name and default sort by score or else sort by user sort query
   const promises = [
-    Products.find(req.query).limit(limit).skip(skip).sort(sort),
-    Products.countDocuments(filter),
+    req.query.$text
+      ? Products.find(req.query, { score: { $meta: 'textScore' } })
+          .limit(limit)
+          .skip(skip)
+          .sort(sort || { score: { $meta: 'textScore' } })
+      : Products.find(req.query).limit(limit).skip(skip).sort(sort),
+    Products.countDocuments(req.query),
   ];
 
   const result = await Promise.all(promises);
