@@ -44,7 +44,7 @@ mongoose
 
 // -----------------------------------------------------------------------
 
-const axios = require('axios');
-setInterval(() => {
-  axios.get('http://localhost:5000/');
-}, 1500000);
+// const axios = require('axios');
+// setInterval(() => {
+//   axios.get('http://localhost:5000/');
+// }, 1500000);

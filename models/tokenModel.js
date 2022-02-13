@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-// var ttl = require('mongoose-ttl');
+var ttl = require('mongoose-ttl');
 
 const tokenSchema = new mongoose.Schema(
   {
@@ -11,8 +11,8 @@ const tokenSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-// tokenSchema.plugin(ttl, {ttl: '2m'});
-// tokenSchema.index({createdAt:1},{expireAfterSeconds:120});
+tokenSchema.plugin(ttl, { ttl: '2m' });
+tokenSchema.index({ createdAt: 1 }, { expireAfterSeconds: 120 });
 const token = mongoose.model('token', tokenSchema);
 
 module.exports = token;
