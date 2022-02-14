@@ -9,9 +9,10 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-const DB = 
-process.env.DATABASE_LOCAL;
-// process.env.DATABASE;
+let DB = process.env.DATABASE_LOCAL;
+if (process.env.NODE_ENV === 'production') {
+  DB = process.env.DATABASE;
+}
 
 mongoose
   .connect(DB, {
@@ -23,21 +24,28 @@ mongoose
   })
   .then(() => {
     console.log(`DB connected...`);
+
+    const port = process.env.PORT || 5000;
+
+    const server = app.listen(port, () => {
+      console.log(`Server running at PORT : ${port}/`);
+    });
+
+    process.on('unhandledRejection', (err) => {
+      console.log(err.name, err.message);
+      console.log('UNHANDLED REJECTION ! Shutting Down...');
+      server.close(() => {
+        process.exit(1);
+      });
+    });
   })
   .catch((err) => {
     console.log(err);
   });
 
-const port = process.env.PORT || 5000;
+// -----------------------------------------------------------------------
 
-const server = app.listen(port, () => {
-  console.log(`Server running at PORT : ${port}/`);
-});
-
-process.on('unhandledRejection', (err) => {
-  console.log(err.name, err.message);
-  console.log('UNHANDLED REJECTION ! Shutting Down...');
-  server.close(() => {
-    process.exit(1);
-  });
-});
+// const axios = require('axios');
+// setInterval(() => {
+//   axios.get('http://localhost:5000/');
+// }, 1500000);

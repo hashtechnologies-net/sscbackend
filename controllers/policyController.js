@@ -85,18 +85,6 @@ function checkFileType(file, cb) {
 const MLM_URI = "https://ssc-mlm.herokuapp.com/api/v1/distributor/chain/create-chain";
 
 exports.uploadPolicyPhoto = (req, res, next) => {
-    // console.log(req.body)
-    // if (!req.body.policy_holder_image ||
-    //     !req.body.citizenship_front ||
-    //     !req.body.citizenship_back
-    // ) {
-    //     return next(
-    //         new AppError(
-    //             `Please provide a policy holder photo , citizenship front side and citizenship back side.`,
-    //             400
-    //         )
-    //     );
-    // }
     const upload = multer({
         storage: storage,
         limits: {

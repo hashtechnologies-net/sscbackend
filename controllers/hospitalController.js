@@ -79,7 +79,11 @@ exports.getAllHospitals = catchAsync(async (req, res, next) => {
     .limitFields()
     .paginate();
   const hospitals = await features.query;
-  const hospitalsCount = await Hospital.countDocuments();
+
+  const options = {};
+  if (req.query.hasOwnProperty('isVisible'))
+    options.isVisible = req.query.isVisible;
+  const hospitalsCount = await Hospital.countDocuments(options);
 
   return res.status(200).json({
     status: 'success',

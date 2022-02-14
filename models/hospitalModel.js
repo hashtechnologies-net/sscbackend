@@ -45,6 +45,10 @@ const hospitalSchema = new mongoose.Schema(
     slug: String,
     services: String,
     description: String,
+    isVisible: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );
