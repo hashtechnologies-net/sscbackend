@@ -3,23 +3,16 @@ const path = require('path');
 const compression = require('compression');
 const globalErrorHandler = require('./controllers/errorController');
 const app = express();
-// const fileupload = require('express-fileupload');
-
 const xss = require('xss-clean');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cors = require('cors');
-
+app.use(cors());
 // ecommerce
-
-const productRoutes = require('./routes/productsRoutes');
-const orderRoutes = require('./routes/orderRoutes');
-const categoryRoutes = require('./routes/categoryRoutes');
 
 app.use(compression());
 app.use(express.json());
-// app.use(express.static(path.resolve(__dirname, 'client/build')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 if (process.env.NODE_ENV == 'development') {
@@ -40,7 +33,7 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 // app.use(hpp());
-app.use(cors());
+
 // app.use(fileupload());
 
 const appointmentRouter = require('./routes/appointmentRoutes');
@@ -55,6 +48,9 @@ const userRouter = require('./routes/userRoutes');
 const homeRouter = require('./routes/homeRoutes');
 const AppError = require('./utils/appError');
 const cartRouter = require('./routes/cartRoutes');
+const productRoutes = require('./routes/productsRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
 
 app.use('/', homeRouter);
 
@@ -70,7 +66,6 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/users/cart', cartRouter);
 
 // ecommerce
-
 app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/categories', categoryRoutes);

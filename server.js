@@ -9,10 +9,7 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-let DB = process.env.DATABASE_LOCAL;
-if (process.env.NODE_ENV === 'production') {
-  DB = process.env.DATABASE;
-}
+let DB = process.env.DATABASE;
 
 mongoose
   .connect(DB, {
