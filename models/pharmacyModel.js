@@ -43,6 +43,10 @@ const pharmacySchema = new mongoose.Schema(
       default: 'Not available',
     },
     slug: { type: String },
+    isVisible: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );
@@ -51,7 +55,6 @@ pharmacySchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
-
 
 const Pharmacy = mongoose.model('Pharmacy', pharmacySchema);
 
