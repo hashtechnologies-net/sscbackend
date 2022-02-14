@@ -65,7 +65,11 @@ exports.getAllClinics = catchAsync(async (req, res, next) => {
     .limitFields()
     .paginate();
   const clinics = await features.query;
-  const clinicsCount = await Clinic.countDocuments();
+
+  const options = {};
+  if (req.query.hasOwnProperty('isVisible'))
+    options.isVisible = req.query.isVisible;
+  const clinicsCount = await Clinic.countDocuments(options);
 
   return res.status(200).json({
     status: 'success',
