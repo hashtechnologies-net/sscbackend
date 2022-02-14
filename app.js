@@ -77,11 +77,15 @@ app.use('/api/v1/categories', categoryRoutes);
 
 app.all('*', (req, res, next) => {
 <<<<<<< HEAD
+<<<<<<< HEAD
     
     next(new AppError(`Cant find ${req.originalUrl} on this server`, 404));
 =======
   next(new AppError(`Cant find ${req.originalUrl} on this server`, 404));
 >>>>>>> 64ec81c026c9b33571dbae4cc00ed8e6fd1c0a1b
+=======
+  next(new AppError(`Cant find ${req.originalUrl} on this server`, 404));
+>>>>>>> 4b9196034a5b850619963f4f0ecc0600c69ee747
 });
 
 
