@@ -64,7 +64,11 @@ exports.getAllPathlabs = catchAsync(async (req, res, next) => {
     .limitFields()
     .paginate();
   const pathlabs = await features.query;
-  const pathlabsCount = await Pathlab.countDocuments();
+
+  const options = {};
+  if (req.query.hasOwnProperty('isVisible'))
+    options.isVisible = req.query.isVisible;
+  const pathlabsCount = await Pathlab.countDocuments(options);
 
   return res.status(200).json({
     status: 'success',
