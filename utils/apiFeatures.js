@@ -52,5 +52,9 @@ class APIFeatures {
 
     return this;
   }
+  populate(rel){
+    this.query = this.query.populate(rel);
+    return this
+  }
 }
 module.exports = APIFeatures;

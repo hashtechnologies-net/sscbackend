@@ -18,7 +18,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 
 app.use(compression());
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json());
 // app.use(express.static(path.resolve(__dirname, 'client/build')));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -78,6 +78,8 @@ app.use('/api/v1/categories', categoryRoutes);
 app.all('*', (req, res, next) => {
   next(new AppError(`Cant find ${req.originalUrl} on this server`, 404));
 });
+
+
 
 app.use(globalErrorHandler);
 
